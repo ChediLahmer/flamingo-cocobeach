@@ -1,0 +1,104 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Admin {
+  id        Int      @id @default(autoincrement())
+  email     String   @unique
+  password  String
+  createdAt DateTime @default(now()) @map("created_at")
+
+  resetTokens PasswordReset[]
+
+  @@map("admins")
+}
+
+model PasswordReset {
+  id        Int       @id @default(autoincrement())
+  token     String    @unique
+  adminId   Int       @map("admin_id")
+  admin     Admin     @relation(fields: [adminId], references: [id], onDelete: Cascade)
+  expiresAt DateTime  @map("expires_at")
+  usedAt    DateTime? @map("used_at")
+  createdAt DateTime  @default(now()) @map("created_at")
+
+  @@index([adminId])
+  @@map("password_resets")
+}
+
+model MenuCategory {
+  id    Int        @id @default(autoincrement())
+  name  Json       // { fr, en }
+  order Int        @default(0)
+  items MenuItem[]
+
+  @@map("menu_categories")
+}
+
+model MenuItem {
+  id            Int          @id @default(autoincrement())
+  name          Json         // { fr, en }
+  description   Json?        // { fr, en }
+  image         String?
+  priceStandard Decimal      @db.Decimal(8, 2) @map("price_standard")
+  priceExtra    Decimal      @default(0) @db.Decimal(8, 2) @map("price_extra")
+  available     Boolean      @default(true)
+  visible       Boolean      @default(true)
+  categoryId    Int          @map("category_id")
+  category      MenuCategory @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  order         Int          @default(0)
+  createdAt     DateTime     @default(now()) @map("created_at")
+
+  @@index([categoryId])
+  @@map("menu_items")
+}
+
+model Space {
+  id          Int     @id @default(autoincrement())
+  name        Json    // { fr, en }
+  description Json?   // { fr, en }
+  image       String?
+  price       Decimal @db.Decimal(8, 2)
+  capacity    Int
+  available   Boolean @default(true)
+  visible     Boolean @default(true)
+  order       Int     @default(0)
+
+  @@map("spaces")
+}
+
+model GalleryCategory {
+  id     Int            @id @default(autoincrement())
+  name   Json           // { fr, en }
+  order  Int            @default(0)
+  images GalleryImage[]
+
+  @@map("gallery_categories")
+}
+
+model GalleryImage {
+  id         Int              @id @default(autoincrement())
+  url        String
+  alt        String?
+  categoryId Int?             @map("category_id")
+  catRef     GalleryCategory? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+  order      Int              @default(0)
+  visible    Boolean          @default(true)
+  createdAt  DateTime         @default(now()) @map("created_at")
+
+  @@index([categoryId])
+  @@map("gallery_images")
+}
+
+model SiteConfig {
+  id    Int    @id @default(autoincrement())
+  key   String @unique
+  value String
+
+  @@map("site_config")
+}
