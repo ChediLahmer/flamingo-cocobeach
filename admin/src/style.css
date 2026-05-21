@@ -7,13 +7,11 @@
   --color-primary-light: #ff6b9d;
   --color-primary-dark: #c2185b;
   --color-accent: #ff8a50;
-  --color-sidebar: #1e1225;
-  --color-sidebar-hover: #2e1f38;
   --color-surface: #ffffff;
-  --color-surface-alt: #fdf8f6;
-  --color-border: #f0e4df;
-  --color-text: #2d1b33;
-  --color-text-muted: #7c6a82;
+  --color-surface-alt: #faf7f5;
+  --color-border: #ede7e3;
+  --color-text: #1a1a1a;
+  --color-text-muted: #6b7280;
   --color-danger: #ef4444;
   --color-success: #10b981;
 
@@ -60,4 +58,26 @@ body {
 }
 .scrollbar-hide::-webkit-scrollbar {
   display: none;
+}
+
+/* Slide-in panel transition */
+.slide-panel-enter-active,
+.slide-panel-leave-active {
+  transition: all 0.25s ease;
+}
+.slide-panel-enter-active > div:last-child,
+.slide-panel-leave-active > div:last-child {
+  transition: transform 0.25s ease;
+}
+.slide-panel-enter-from > div:last-child,
+.slide-panel-leave-to > div:last-child {
+  transform: translateX(100%);
+}
+.slide-panel-enter-from > .absolute,
+.slide-panel-leave-to > .absolute {
+  opacity: 0;
+}
+.slide-panel-enter-active > .absolute,
+.slide-panel-leave-active > .absolute {
+  transition: opacity 0.2s ease;
 }

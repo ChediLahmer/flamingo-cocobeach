@@ -7,7 +7,6 @@ const api = useApi();
 const categories = ref([]);
 const allImages = ref([]);
 const selectedCat = ref(null);
-const showUpload = ref(false);
 const showCatForm = ref(false);
 const uploadCatId = ref(null);
 const uploading = ref(false);
@@ -147,48 +146,27 @@ async function deleteCat(cat) {
     >
       <div>
         <h1 class="text-2xl font-bold text-text">Galerie</h1>
-        <p class="mt-1 text-sm text-text-muted">Gerez vos photos et videos</p>
+        <p class="mt-1 text-sm text-text-muted">Gérez vos photos et vidéos</p>
       </div>
-      <div class="flex gap-3">
-        <button
-          @click="showCatForm = true"
-          class="inline-flex items-center gap-2 rounded-lg border border-border px-4 py-2.5 text-sm font-medium text-text hover:bg-surface-alt transition-colors"
+      <button
+        @click="showCatForm = true"
+        class="inline-flex items-center gap-2 rounded-lg border border-border px-4 py-2.5 text-sm font-medium text-text hover:bg-surface-alt transition-colors"
+      >
+        <svg
+          class="h-4 w-4"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+          stroke-width="2"
         >
-          <svg
-            class="h-4 w-4"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-            stroke-width="2"
-          >
-            <path
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              d="M12 4.5v15m7.5-7.5h-15"
-            />
-          </svg>
-          Categorie
-        </button>
-        <button
-          @click="showUpload = true"
-          class="inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2.5 text-sm font-medium text-white shadow-sm hover:bg-primary-dark transition-colors"
-        >
-          <svg
-            class="h-4 w-4"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-            stroke-width="2"
-          >
-            <path
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5"
-            />
-          </svg>
-          Photos
-        </button>
-      </div>
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            d="M12 4.5v15m7.5-7.5h-15"
+          />
+        </svg>
+        Catégorie
+      </button>
     </div>
 
     <!-- Category filter tabs -->
@@ -240,9 +218,9 @@ async function deleteCat(cat) {
           </svg>
         </button>
       </div>
-      <span class="flex items-center text-sm text-text-muted ml-auto shrink-0">
-        {{ imageCount }} image(s)
-      </span>
+      <span class="flex items-center text-sm text-text-muted ml-auto shrink-0"
+        >{{ imageCount }} image(s)</span
+      >
     </div>
 
     <!-- Loading -->
@@ -254,6 +232,69 @@ async function deleteCat(cat) {
 
     <!-- Images grid -->
     <div v-else class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+      <!-- Upload zone as first card -->
+      <label
+        class="relative flex flex-col items-center justify-center h-40 rounded-xl border-2 border-dashed border-border hover:border-primary/50 bg-surface-alt/50 hover:bg-primary/5 cursor-pointer transition-all group"
+      >
+        <input
+          type="file"
+          multiple
+          accept="image/*,video/*"
+          @change="onFiles"
+          :disabled="uploading"
+          class="sr-only"
+        />
+        <div v-if="uploading" class="text-center px-3">
+          <div
+            class="h-6 w-6 border-3 border-primary/30 border-t-primary rounded-full animate-spin mx-auto mb-2"
+          ></div>
+          <p class="text-xs text-text-muted">{{ uploadProgress }}</p>
+          <div class="w-full h-1.5 bg-border rounded-full mt-2 overflow-hidden">
+            <div
+              class="h-full bg-primary rounded-full transition-all duration-300"
+              :style="{
+                width:
+                  uploadTotal > 0
+                    ? `${(uploadCurrent / uploadTotal) * 100}%`
+                    : '0%',
+              }"
+            ></div>
+          </div>
+        </div>
+        <template v-else>
+          <svg
+            class="h-8 w-8 text-text-muted/50 group-hover:text-primary transition-colors mb-1.5"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+            stroke-width="1.5"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              d="M12 4.5v15m7.5-7.5h-15"
+            />
+          </svg>
+          <p
+            class="text-xs text-text-muted group-hover:text-primary transition-colors"
+          >
+            Ajouter
+          </p>
+        </template>
+        <!-- Category select for upload -->
+        <select
+          v-model="uploadCatId"
+          @click.stop
+          class="absolute bottom-2 left-2 right-2 text-[0.65rem] px-2 py-1 bg-surface border border-border rounded text-text-muted outline-none"
+        >
+          <option :value="null">Sans catégorie</option>
+          <option v-for="cat in categories" :key="cat.id" :value="cat.id">
+            {{ cat.name.fr }}
+          </option>
+        </select>
+      </label>
+
+      <!-- Empty state -->
       <div
         v-if="!paginatedImages.length"
         class="col-span-full flex flex-col items-center justify-center py-12 text-text-muted"
@@ -273,6 +314,8 @@ async function deleteCat(cat) {
         </svg>
         <p class="text-sm">Aucune image</p>
       </div>
+
+      <!-- Image cards -->
       <div
         v-for="img in paginatedImages"
         :key="img.id"
@@ -304,7 +347,7 @@ async function deleteCat(cat) {
           v-if="!img.visible"
           class="absolute top-2 right-2 bg-danger text-white text-[0.65rem] px-2 py-0.5 rounded-full font-medium"
         >
-          Masque
+          Masqué
         </div>
       </div>
     </div>
@@ -314,16 +357,16 @@ async function deleteCat(cat) {
       v-if="totalPages > 1 && !loading"
       class="flex items-center justify-between mt-6 rounded-2xl border border-border bg-surface p-4 shadow-sm"
     >
-      <span class="text-sm text-text-muted">
-        Page {{ page }} / {{ totalPages }}
-      </span>
+      <span class="text-sm text-text-muted"
+        >Page {{ page }} / {{ totalPages }}</span
+      >
       <div class="flex gap-2">
         <button
           @click="page--"
           :disabled="page <= 1"
           class="px-3 py-1.5 text-sm border border-border rounded-lg disabled:opacity-30 hover:bg-surface-alt transition-colors"
         >
-          Precedent
+          Précédent
         </button>
         <button
           @click="page++"
@@ -335,98 +378,69 @@ async function deleteCat(cat) {
       </div>
     </div>
 
-    <!-- Upload Modal -->
+    <!-- Category Panel (slide-in) -->
     <Teleport to="body">
-      <Transition name="fade">
-        <div
-          v-if="showUpload"
-          class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4"
-          @click.self="!uploading && (showUpload = false)"
-        >
-          <div class="bg-surface rounded-2xl shadow-xl p-6 w-full max-w-md">
-            <h3 class="text-lg font-semibold text-text mb-5">
-              Ajouter des photos
-            </h3>
-            <div class="space-y-3">
-              <select
-                v-model="uploadCatId"
-                class="w-full px-4 py-2.5 border border-border rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none text-sm"
-              >
-                <option :value="null">Sans categorie</option>
-                <option v-for="cat in categories" :key="cat.id" :value="cat.id">
-                  {{ cat.name.fr }}
-                </option>
-              </select>
-              <input
-                type="file"
-                multiple
-                accept="image/*,video/*"
-                @change="onFiles"
-                :disabled="uploading"
-                class="w-full text-sm file:mr-3 file:px-3 file:py-1.5 file:border-0 file:rounded-lg file:bg-primary/10 file:text-primary file:font-medium file:cursor-pointer disabled:opacity-50"
-              />
-              <!-- Progress -->
-              <div v-if="uploading" class="space-y-2">
-                <div class="flex items-center justify-between text-sm">
-                  <span class="text-text-muted">Upload en cours...</span>
-                  <span class="font-medium text-text">{{
-                    uploadProgress
-                  }}</span>
-                </div>
-                <div
-                  class="w-full h-2 bg-surface-alt rounded-full overflow-hidden"
-                >
-                  <div
-                    class="h-full bg-primary rounded-full transition-all duration-300"
-                    :style="{
-                      width:
-                        uploadTotal > 0
-                          ? `${(uploadCurrent / uploadTotal) * 100}%`
-                          : '0%',
-                    }"
-                  ></div>
-                </div>
-              </div>
-            </div>
-            <div class="flex gap-3 justify-end mt-6">
-              <button
-                @click="showUpload = false"
-                :disabled="uploading"
-                class="px-4 py-2 text-sm border border-border rounded-lg hover:bg-surface-alt disabled:opacity-50 transition-colors"
-              >
-                Fermer
-              </button>
-            </div>
-          </div>
-        </div>
-      </Transition>
-    </Teleport>
-
-    <!-- Category Modal -->
-    <Teleport to="body">
-      <Transition name="fade">
+      <Transition name="slide-panel">
         <div
           v-if="showCatForm"
-          class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4"
+          class="fixed inset-0 z-50 flex justify-end"
           @click.self="showCatForm = false"
         >
-          <div class="bg-surface rounded-2xl shadow-xl p-6 w-full max-w-md">
-            <h3 class="text-lg font-semibold text-text mb-5">
-              Nouvelle categorie
-            </h3>
-            <div class="space-y-3">
-              <input
-                v-model="catForm.fr"
-                placeholder="Nom (FR) *"
-                class="w-full px-4 py-2.5 border border-border rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none text-sm"
-              />
-              <input
-                v-model="catForm.en"
-                placeholder="Name (EN)"
-                class="w-full px-4 py-2.5 border border-border rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none text-sm"
-              />
+          <div
+            class="absolute inset-0 bg-black/30"
+            @click="showCatForm = false"
+          ></div>
+          <div
+            class="relative w-full max-w-sm bg-surface h-full shadow-2xl flex flex-col"
+          >
+            <div
+              class="flex items-center justify-between px-6 py-5 border-b border-border"
+            >
+              <h3 class="text-lg font-semibold text-text">
+                Nouvelle catégorie
+              </h3>
+              <button
+                @click="showCatForm = false"
+                class="p-1.5 rounded-lg text-text-muted hover:bg-surface-alt transition-colors"
+              >
+                <svg
+                  class="h-5 w-5"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                  stroke-width="2"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    d="M6 18L18 6M6 6l12 12"
+                  />
+                </svg>
+              </button>
             </div>
-            <div class="flex gap-3 justify-end mt-6">
+            <div class="flex-1 overflow-y-auto p-6 space-y-4">
+              <div>
+                <label class="block text-xs font-medium text-text-muted mb-1.5"
+                  >Nom (FR) *</label
+                >
+                <input
+                  v-model="catForm.fr"
+                  class="w-full px-4 py-2.5 border border-border rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none text-sm"
+                />
+              </div>
+              <div>
+                <label class="block text-xs font-medium text-text-muted mb-1.5"
+                  >Name (EN)</label
+                >
+                <input
+                  v-model="catForm.en"
+                  class="w-full px-4 py-2.5 border border-border rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none text-sm"
+                />
+              </div>
+            </div>
+            <div
+              class="px-6 py-4 border-t border-border flex gap-3 justify-end"
+            >
               <button
                 @click="showCatForm = false"
                 class="px-4 py-2 text-sm border border-border rounded-lg hover:bg-surface-alt transition-colors"
@@ -437,7 +451,7 @@ async function deleteCat(cat) {
                 @click="saveCat"
                 class="px-4 py-2 text-sm bg-primary text-white rounded-lg hover:bg-primary-dark transition-colors"
               >
-                Creer
+                Créer
               </button>
             </div>
           </div>

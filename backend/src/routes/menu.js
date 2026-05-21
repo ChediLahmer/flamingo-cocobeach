@@ -87,9 +87,39 @@ export async function menuRoutes(app) {
   );
 
   app.get("/items", { preHandler: optionalAuth }, async (request) => {
-    const { categoryId, page, limit: rawLimit } = request.query;
+    const {
+      categoryId,
+      page,
+      limit: rawLimit,
+      search,
+      sortBy,
+      sortDir,
+      available,
+      visible,
+    } = request.query;
+
     const where = request.admin ? {} : { visible: true, available: true };
     if (categoryId) where.categoryId = Number(categoryId);
+
+    if (request.admin) {
+      if (available === "true") where.available = true;
+      else if (available === "false") where.available = false;
+      if (visible === "true") where.visible = true;
+      else if (visible === "false") where.visible = false;
+    }
+
+    if (search && search.trim()) {
+      const s = search.trim();
+      where.OR = [
+        { name: { path: ["fr"], string_contains: s } },
+        { name: { path: ["en"], string_contains: s } },
+      ];
+    }
+
+    const allowedSorts = ["order", "name", "priceStandard"];
+    const sortField = allowedSorts.includes(sortBy) ? sortBy : "order";
+    const direction = sortDir === "desc" ? "desc" : "asc";
+    const orderBy = { [sortField]: direction };
 
     const limit = Math.min(Number(rawLimit) || 20, 100);
     const pageNum = Number(page) || 1;
@@ -98,7 +128,7 @@ export async function menuRoutes(app) {
     const [items, total] = await Promise.all([
       prisma.menuItem.findMany({
         where,
-        orderBy: { order: "asc" },
+        orderBy,
         take: limit,
         skip: offset,
       }),

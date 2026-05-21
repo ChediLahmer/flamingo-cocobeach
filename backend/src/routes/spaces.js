@@ -10,8 +10,47 @@ import {
 
 export async function spacesRoutes(app) {
   app.get("/", { preHandler: optionalAuth }, async (request) => {
-    const { page, limit: rawLimit } = request.query;
+    const {
+      page,
+      limit: rawLimit,
+      search,
+      sortBy,
+      sortDir,
+      available,
+      visible,
+      capacityMin,
+      priceMax,
+    } = request.query;
+
     const where = request.admin ? {} : { available: true, visible: true };
+
+    if (request.admin) {
+      if (available === "true") where.available = true;
+      else if (available === "false") where.available = false;
+      if (visible === "true") where.visible = true;
+      else if (visible === "false") where.visible = false;
+    }
+
+    if (capacityMin && Number(capacityMin) > 0) {
+      where.capacity = { gte: Number(capacityMin) };
+    }
+    if (priceMax && Number(priceMax) > 0) {
+      where.price = { lte: Number(priceMax) };
+    }
+
+    if (search && search.trim()) {
+      const s = search.trim();
+      where.OR = [
+        { name: { path: ["fr"], string_contains: s } },
+        { name: { path: ["en"], string_contains: s } },
+      ];
+    }
+
+    const allowedSorts = ["order", "name", "price", "capacity"];
+    const sortField = allowedSorts.includes(sortBy) ? sortBy : "order";
+    const direction = sortDir === "desc" ? "desc" : "asc";
+    const orderBy = { [sortField]: direction };
+
     const limit = Math.min(Number(rawLimit) || 20, 100);
     const pageNum = Number(page) || 1;
     const offset = (pageNum - 1) * limit;
@@ -19,7 +58,7 @@ export async function spacesRoutes(app) {
     const [items, total] = await Promise.all([
       prisma.space.findMany({
         where,
-        orderBy: { order: "asc" },
+        orderBy,
         take: limit,
         skip: offset,
       }),

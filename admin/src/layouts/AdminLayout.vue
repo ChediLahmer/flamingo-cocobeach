@@ -6,7 +6,7 @@ import { useAuth } from "../composables/useAuth";
 const router = useRouter();
 const route = useRoute();
 const { logout } = useAuth();
-const sidebarOpen = ref(true);
+const collapsed = ref(false);
 
 const navItems = [
   { to: "/", label: "Dashboard", icon: "dashboard" },
@@ -24,40 +24,48 @@ function handleLogout() {
 
 <template>
   <div class="flex h-screen bg-surface-alt">
-    <!-- Sidebar -->
+    <!-- Light Sidebar -->
     <aside
-      class="flex flex-col bg-gradient-to-b from-sidebar via-sidebar to-[#2a1030] text-white transition-all duration-300 h-full shadow-xl"
-      :class="sidebarOpen ? 'w-60' : 'w-[4.5rem]'"
+      class="flex flex-col bg-surface border-r border-border transition-all duration-300 h-full"
+      :class="collapsed ? 'w-[4.5rem]' : 'w-56'"
     >
       <!-- Brand -->
-      <div class="flex items-center gap-3 px-5 py-5 border-b border-white/10">
+      <div class="flex items-center gap-3 px-4 py-5">
         <div
-          class="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-gradient-to-br from-primary to-accent text-white font-bold text-sm shadow-lg shadow-primary/20"
+          class="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-primary text-white font-bold text-sm"
         >
           FC
         </div>
-        <div v-show="sidebarOpen" class="overflow-hidden">
-          <h1 class="text-sm font-semibold text-white truncate tracking-wide">
-            Flamingo
+        <div v-show="!collapsed" class="overflow-hidden">
+          <h1
+            class="font-display text-lg text-text tracking-wide leading-tight"
+          >
+            FLAMINGO
           </h1>
-          <p class="text-[0.65rem] text-pink-300/60">Coco Beach Admin</p>
+          <p class="text-[0.6rem] text-text-muted">Coco Beach</p>
         </div>
       </div>
 
       <!-- Navigation -->
-      <nav class="flex-1 px-3 py-4 space-y-1 overflow-y-auto">
+      <nav class="flex-1 px-2 py-2 space-y-0.5 overflow-y-auto">
         <router-link
           v-for="item in navItems"
           :key="item.to"
           :to="item.to"
-          class="group flex items-center gap-3 px-3 py-2.5 rounded-lg text-[0.8rem] font-medium transition-all duration-200"
+          class="group relative flex items-center gap-3 px-3 py-2.5 rounded-lg text-[0.8rem] font-medium transition-all duration-150"
           :class="[
             route.path === item.to
-              ? 'bg-primary/15 text-white border border-primary/20'
-              : 'text-white/60 hover:bg-white/5 hover:text-white border border-transparent',
+              ? 'text-primary bg-primary/5 font-semibold'
+              : 'text-text-muted hover:text-text hover:bg-surface-alt',
           ]"
         >
-          <!-- SVG Icons -->
+          <!-- Active indicator -->
+          <span
+            v-if="route.path === item.to"
+            class="absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-5 bg-primary rounded-r-full"
+          ></span>
+
+          <!-- Icons -->
           <svg
             v-if="item.icon === 'dashboard'"
             class="h-[1.15rem] w-[1.15rem] shrink-0"
@@ -133,19 +141,19 @@ function handleLogout() {
               d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
             />
           </svg>
-          <span v-show="sidebarOpen" class="truncate">{{ item.label }}</span>
+          <span v-show="!collapsed" class="truncate">{{ item.label }}</span>
         </router-link>
       </nav>
 
-      <!-- Collapse + Logout -->
-      <div class="px-3 py-3 border-t border-white/10 space-y-1">
+      <!-- Bottom actions -->
+      <div class="px-2 py-3 border-t border-border space-y-0.5">
         <button
-          @click="sidebarOpen = !sidebarOpen"
-          class="flex w-full items-center gap-3 px-3 py-2 rounded-lg text-[0.8rem] text-pink-200/50 hover:bg-white/5 hover:text-white transition-colors"
+          @click="collapsed = !collapsed"
+          class="flex w-full items-center gap-3 px-3 py-2 rounded-lg text-[0.8rem] text-text-muted hover:text-text hover:bg-surface-alt transition-colors"
         >
           <svg
             class="h-[1.15rem] w-[1.15rem] shrink-0 transition-transform"
-            :class="{ 'rotate-180': !sidebarOpen }"
+            :class="{ 'rotate-180': collapsed }"
             fill="none"
             stroke="currentColor"
             viewBox="0 0 24 24"
@@ -157,11 +165,11 @@ function handleLogout() {
               d="M18.75 19.5l-7.5-7.5 7.5-7.5m-6 15L5.25 12l7.5-7.5"
             />
           </svg>
-          <span v-show="sidebarOpen">Reduire</span>
+          <span v-show="!collapsed">Réduire</span>
         </button>
         <button
           @click="handleLogout"
-          class="flex w-full items-center gap-3 px-3 py-2 rounded-lg text-[0.8rem] text-red-400 hover:bg-red-500/10 hover:text-red-300 transition-colors"
+          class="flex w-full items-center gap-3 px-3 py-2 rounded-lg text-[0.8rem] text-danger hover:bg-danger/5 transition-colors"
         >
           <svg
             class="h-[1.15rem] w-[1.15rem] shrink-0"
@@ -176,15 +184,19 @@ function handleLogout() {
               d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15m3 0l3-3m0 0l-3-3m3 3H9"
             />
           </svg>
-          <span v-show="sidebarOpen">Deconnexion</span>
+          <span v-show="!collapsed">Déconnexion</span>
         </button>
       </div>
     </aside>
 
     <!-- Main content -->
     <main class="flex-1 overflow-y-auto">
-      <div class="p-4 sm:p-6 lg:p-8">
-        <router-view />
+      <div class="p-5 sm:p-7 lg:p-9">
+        <router-view v-slot="{ Component }">
+          <keep-alive>
+            <component :is="Component" />
+          </keep-alive>
+        </router-view>
       </div>
     </main>
   </div>

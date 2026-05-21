@@ -8,8 +8,11 @@ export default function MenuPage() {
   const [searchParams, setSearchParams] = useSearchParams();
   const [categories, setCategories] = useState([]);
   const [activeTab, setActiveTab] = useState(null);
+  const [items, setItems] = useState([]);
   const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
   const [loading, setLoading] = useState(true);
+  const [itemsLoading, setItemsLoading] = useState(false);
 
   useEffect(() => {
     fetch("/api/menu/categories")
@@ -27,13 +30,28 @@ export default function MenuPage() {
       .finally(() => setLoading(false));
   }, []);
 
-  const activeCategory = categories.find((c) => c.id === activeTab);
-  const items = activeCategory?.items || [];
-  const totalPages = Math.ceil(items.length / ITEMS_PER_PAGE);
-  const paginatedItems = items.slice(
-    (page - 1) * ITEMS_PER_PAGE,
-    page * ITEMS_PER_PAGE,
-  );
+  const loadItems = useCallback(async (categoryId, p = 1) => {
+    if (!categoryId) return;
+    setItemsLoading(true);
+    try {
+      const params = new URLSearchParams({
+        categoryId,
+        page: p,
+        limit: ITEMS_PER_PAGE,
+      });
+      const res = await fetch(`/api/menu/items?${params}`);
+      const data = await res.json();
+      setItems(data.items || []);
+      setTotalPages(data.totalPages || 1);
+      setPage(data.page || p);
+    } finally {
+      setItemsLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (activeTab) loadItems(activeTab, 1);
+  }, [activeTab, loadItems]);
 
   const changeTab = useCallback(
     (id) => {
@@ -42,6 +60,14 @@ export default function MenuPage() {
       setSearchParams({ cat: id });
     },
     [setSearchParams],
+  );
+
+  const goToPage = useCallback(
+    (p) => {
+      setPage(p);
+      loadItems(activeTab, p);
+    },
+    [activeTab, loadItems],
   );
 
   return (
@@ -76,24 +102,21 @@ export default function MenuPage() {
               }`}
             >
               {cat.name.fr}
-              <span className="ml-2 text-xs opacity-70">
-                ({cat.items?.length || 0})
-              </span>
             </button>
           ))}
         </div>
 
         {/* Loading */}
-        {loading && (
+        {(loading || itemsLoading) && (
           <div className="flex justify-center mt-12">
             <div className="w-8 h-8 border-2 border-flamingo border-t-transparent rounded-full animate-spin" />
           </div>
         )}
 
         {/* Items grid */}
-        {!loading && paginatedItems.length > 0 && (
+        {!loading && !itemsLoading && items.length > 0 && (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 max-w-6xl mx-auto">
-            {paginatedItems.map((item, i) => (
+            {items.map((item, i) => (
               <motion.div
                 key={item.id}
                 className="group flex gap-4 p-4 rounded-2xl bg-white/70 hover:bg-white transition-all border border-flamingo/10 hover:border-flamingo/30 shadow-sm"
@@ -135,10 +158,10 @@ export default function MenuPage() {
         )}
 
         {/* Pagination */}
-        {!loading && totalPages > 1 && (
+        {!loading && !itemsLoading && totalPages > 1 && (
           <div className="flex items-center justify-center gap-4 mt-10">
             <button
-              onClick={() => setPage((p) => Math.max(1, p - 1))}
+              onClick={() => goToPage(page - 1)}
               disabled={page === 1}
               className="px-4 py-2 rounded-lg bg-flamingo/10 text-flamingo font-medium disabled:opacity-30 disabled:cursor-not-allowed hover:bg-flamingo/20 transition"
             >
@@ -148,7 +171,7 @@ export default function MenuPage() {
               {page} / {totalPages}
             </span>
             <button
-              onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+              onClick={() => goToPage(page + 1)}
               disabled={page === totalPages}
               className="px-4 py-2 rounded-lg bg-flamingo/10 text-flamingo font-medium disabled:opacity-30 disabled:cursor-not-allowed hover:bg-flamingo/20 transition"
             >
@@ -157,7 +180,7 @@ export default function MenuPage() {
           </div>
         )}
 
-        {!loading && items.length === 0 && activeTab && (
+        {!loading && !itemsLoading && items.length === 0 && activeTab && (
           <p className="text-center text-gray-400 mt-8">
             Aucun article dans cette categorie
           </p>
