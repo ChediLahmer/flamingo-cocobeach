@@ -10,16 +10,21 @@ export default function SpacesPage() {
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(false);
   const { t, localizedValue } = useLanguage();
 
   const loadSpaces = useCallback(async (p = 1) => {
     setLoading(true);
+    setError(false);
     try {
       const res = await fetch(`/api/spaces?page=${p}&limit=${ITEMS_PER_PAGE}`);
+      if (!res.ok) throw new Error(res.status);
       const data = await res.json();
       setSpaces(data.items || []);
       setTotalPages(data.totalPages || 1);
       setPage(data.page || p);
+    } catch {
+      setError(true);
     } finally {
       setLoading(false);
     }
@@ -116,6 +121,19 @@ export default function SpacesPage() {
         {loading && (
           <div className="flex justify-center mt-8">
             <div className="w-8 h-8 border-2 border-flamingo border-t-transparent rounded-full animate-spin" />
+          </div>
+        )}
+
+        {/* Error state */}
+        {error && !loading && (
+          <div className="text-center py-16">
+            <p className="text-gray-500 mb-4">{t("common.error_server")}</p>
+            <button
+              onClick={() => loadSpaces(1)}
+              className="px-5 py-2 bg-flamingo text-white rounded-full text-sm font-medium hover:bg-flamingo-dark transition-colors"
+            >
+              {t("common.retry")}
+            </button>
           </div>
         )}
 

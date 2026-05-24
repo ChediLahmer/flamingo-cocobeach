@@ -13,8 +13,12 @@ export default function GalleryTeaser() {
 
   useEffect(() => {
     fetch(`/api/gallery?limit=${MAX_PREVIEW}`)
-      .then((r) => r.json())
-      .then((d) => setImages(d.items || []));
+      .then((r) => {
+        if (!r.ok) throw new Error(r.status);
+        return r.json();
+      })
+      .then((d) => setImages(d.items || []))
+      .catch(() => {});
   }, []);
 
   return (

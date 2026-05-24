@@ -1,6 +1,8 @@
 import { useEffect, useState, lazy, Suspense } from "react";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { LanguageProvider, useLanguage } from "./i18n/LanguageContext";
+import { ToastProvider } from "./components/ToastContext";
+import ErrorBoundary from "./components/ErrorBoundary";
 import Navbar from "./components/Navbar";
 import Footer from "./components/Footer";
 import Loader from "./components/Loader";
@@ -9,6 +11,7 @@ const HomePage = lazy(() => import("./pages/HomePage"));
 const MenuPage = lazy(() => import("./pages/MenuPage"));
 const SpacesPage = lazy(() => import("./pages/SpacesPage"));
 const GalleryPage = lazy(() => import("./pages/GalleryPage"));
+const NotFoundPage = lazy(() => import("./pages/NotFoundPage"));
 
 function PageShell({ children, config }) {
   return (
@@ -42,30 +45,61 @@ function PageShell({ children, config }) {
 export default function App() {
   const [config, setConfig] = useState({});
   const [loading, setLoading] = useState(true);
+  const [configError, setConfigError] = useState(false);
 
   useEffect(() => {
     fetch("/api/config")
-      .then((r) => r.json())
+      .then((r) => {
+        if (!r.ok) throw new Error(r.status);
+        return r.json();
+      })
       .then(setConfig)
+      .catch(() => setConfigError(true))
       .finally(() => setTimeout(() => setLoading(false), 1500));
   }, []);
 
   if (loading) return <Loader />;
 
   return (
-    <LanguageProvider>
-      <AppContent config={config} />
-    </LanguageProvider>
+    <ErrorBoundary>
+      <LanguageProvider>
+        <ToastProvider>
+          <AppContent config={config} configError={configError} />
+        </ToastProvider>
+      </LanguageProvider>
+    </ErrorBoundary>
   );
 }
 
-function AppContent({ config }) {
+function AppContent({ config, configError }) {
   const { dir, lang } = useLanguage();
 
   useEffect(() => {
     document.documentElement.dir = dir;
     document.documentElement.lang = lang;
   }, [dir, lang]);
+
+  if (configError) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50 px-6">
+        <div className="text-center max-w-md">
+          <div className="text-6xl mb-4">🦩</div>
+          <h1 className="text-2xl font-bold text-gray-900 mb-2">
+            Service unavailable
+          </h1>
+          <p className="text-gray-600 mb-6">
+            Unable to connect to the server. Please try again later.
+          </p>
+          <button
+            onClick={() => window.location.reload()}
+            className="px-6 py-3 bg-flamingo text-white rounded-full font-medium hover:bg-flamingo-dark transition-colors"
+          >
+            Retry
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <BrowserRouter>
@@ -100,6 +134,14 @@ function AppContent({ config }) {
             element={
               <PageShell config={config}>
                 <GalleryPage />
+              </PageShell>
+            }
+          />
+          <Route
+            path="*"
+            element={
+              <PageShell config={config}>
+                <NotFoundPage />
               </PageShell>
             }
           />

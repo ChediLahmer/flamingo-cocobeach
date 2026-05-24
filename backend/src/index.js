@@ -12,6 +12,7 @@ import { authRoutes } from "./routes/auth.js";
 import { configRoutes } from "./routes/config.js";
 import { uploadRoutes } from "./routes/upload.js";
 import { mediaRoutes } from "./routes/media.js";
+import { passwordResetRoutes } from "./routes/password-reset.js";
 
 const app = Fastify({
   logger: true,
@@ -70,6 +71,7 @@ app.addHook("onSend", (request, reply, payload, done) => {
 app.get("/api/health", () => ({ status: "ok" }));
 
 await app.register(authRoutes, { prefix: "/api/auth" });
+await app.register(passwordResetRoutes, { prefix: "/api/auth" });
 await app.register(menuRoutes, { prefix: "/api/menu" });
 await app.register(spacesRoutes, { prefix: "/api/spaces" });
 await app.register(galleryRoutes, { prefix: "/api/gallery" });

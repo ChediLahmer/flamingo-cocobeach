@@ -25,6 +25,7 @@ export default function GalleryPage() {
         if (!reset && cursor) params.set("cursor", cursor);
 
         const res = await fetch(`/api/gallery?${params}`);
+        if (!res.ok) throw new Error(res.status);
         const data = await res.json();
         const newItems = data.items || [];
 
@@ -35,6 +36,8 @@ export default function GalleryPage() {
         }
         setCursor(data.nextCursor);
         setHasMore(!!data.nextCursor);
+      } catch {
+        setHasMore(false);
       } finally {
         setLoading(false);
       }
@@ -44,7 +47,10 @@ export default function GalleryPage() {
 
   useEffect(() => {
     fetch("/api/gallery/categories")
-      .then((r) => r.json())
+      .then((r) => {
+        if (!r.ok) throw new Error(r.status);
+        return r.json();
+      })
       .then(setCategories)
       .catch(() => {});
   }, []);
@@ -56,13 +62,16 @@ export default function GalleryPage() {
     const params = new URLSearchParams({ limit: BATCH_SIZE });
     if (activeFilter) params.set("categoryId", activeFilter);
     fetch(`/api/gallery?${params}`)
-      .then((r) => r.json())
+      .then((r) => {
+        if (!r.ok) throw new Error(r.status);
+        return r.json();
+      })
       .then((data) => {
         setImages(data.items || []);
         setCursor(data.nextCursor);
         setHasMore(!!data.nextCursor);
       })
-      .catch(() => {});
+      .catch(() => setHasMore(false));
   }, [activeFilter]);
 
   // Infinite scroll via IntersectionObserver

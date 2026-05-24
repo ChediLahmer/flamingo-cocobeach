@@ -14,11 +14,15 @@ export default function MenuTeaser() {
 
   useEffect(() => {
     fetch("/api/menu/categories")
-      .then((r) => r.json())
+      .then((r) => {
+        if (!r.ok) throw new Error(r.status);
+        return r.json();
+      })
       .then((data) => {
         setCategories(data);
         if (data.length > 0) setActiveTab(data[0].id);
-      });
+      })
+      .catch(() => {});
   }, []);
 
   const activeCategory = categories.find((c) => c.id === activeTab);

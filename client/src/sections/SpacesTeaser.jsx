@@ -13,8 +13,12 @@ export default function SpacesTeaser() {
 
   useEffect(() => {
     fetch(`/api/spaces?limit=${MAX_PREVIEW}`)
-      .then((r) => r.json())
-      .then((data) => setSpaces(data.items || []));
+      .then((r) => {
+        if (!r.ok) throw new Error(r.status);
+        return r.json();
+      })
+      .then((data) => setSpaces(data.items || []))
+      .catch(() => {});
   }, []);
 
   return (

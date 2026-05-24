@@ -14,11 +14,15 @@ export default function MenuPage() {
   const [totalPages, setTotalPages] = useState(1);
   const [loading, setLoading] = useState(true);
   const [itemsLoading, setItemsLoading] = useState(false);
+  const [error, setError] = useState(false);
   const { t, localizedValue } = useLanguage();
 
   useEffect(() => {
     fetch("/api/menu/categories")
-      .then((r) => r.json())
+      .then((r) => {
+        if (!r.ok) throw new Error(r.status);
+        return r.json();
+      })
       .then((data) => {
         const cats = Array.isArray(data) ? data : [];
         setCategories(cats);
@@ -29,6 +33,7 @@ export default function MenuPage() {
           setActiveTab(cats[0].id);
         }
       })
+      .catch(() => setError(true))
       .finally(() => setLoading(false));
   }, []);
 
@@ -42,10 +47,13 @@ export default function MenuPage() {
         limit: ITEMS_PER_PAGE,
       });
       const res = await fetch(`/api/menu/items?${params}`);
+      if (!res.ok) throw new Error(res.status);
       const data = await res.json();
       setItems(data.items || []);
       setTotalPages(data.totalPages || 1);
       setPage(data.page || p);
+    } catch {
+      setError(true);
     } finally {
       setItemsLoading(false);
     }
@@ -109,9 +117,22 @@ export default function MenuPage() {
         </div>
 
         {/* Loading */}
-        {(loading || itemsLoading) && (
+        {(loading || itemsLoading) && !error && (
           <div className="flex justify-center mt-12">
             <div className="w-8 h-8 border-2 border-flamingo border-t-transparent rounded-full animate-spin" />
+          </div>
+        )}
+
+        {/* Error state */}
+        {error && (
+          <div className="text-center py-16">
+            <p className="text-gray-500 mb-4">{t("common.error_server")}</p>
+            <button
+              onClick={() => window.location.reload()}
+              className="px-5 py-2 bg-flamingo text-white rounded-full text-sm font-medium hover:bg-flamingo-dark transition-colors"
+            >
+              {t("common.retry")}
+            </button>
           </div>
         )}
 

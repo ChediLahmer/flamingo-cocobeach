@@ -2,7 +2,6 @@
   <div
     class="min-h-screen flex items-center justify-center bg-gradient-to-br from-sidebar via-[#2a1030] to-primary-dark relative overflow-hidden"
   >
-    <!-- Decorative blobs -->
     <div
       class="absolute top-20 left-10 w-64 h-64 bg-primary/20 rounded-full blur-3xl"
     ></div>
@@ -21,15 +20,33 @@
         </div>
       </div>
       <h1
-        class="font-display text-3xl text-center text-text tracking-wide mb-0"
+        class="font-display text-2xl text-center text-text tracking-wide mb-1"
       >
-        FLAMINGO COCO BEACH
+        Mot de passe oublié
       </h1>
       <p class="text-center text-text-muted text-sm mb-8">
-        Espace Administration
+        Entrez votre email pour recevoir un lien de réinitialisation
       </p>
 
-      <form @submit.prevent="handleLogin" class="space-y-4">
+      <div v-if="sent" class="text-center space-y-4">
+        <div
+          class="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-green-100 text-green-600 text-xl"
+        >
+          ✓
+        </div>
+        <p class="text-sm text-text-muted">
+          Si cette adresse email est associée à un compte, vous recevrez un lien
+          de réinitialisation dans quelques instants.
+        </p>
+        <router-link
+          to="/login"
+          class="inline-block mt-4 text-sm text-primary hover:underline"
+        >
+          ← Retour à la connexion
+        </router-link>
+      </div>
+
+      <form v-else @submit.prevent="handleSubmit" class="space-y-5">
         <div>
           <label class="block text-sm font-medium text-text mb-1">Email</label>
           <input
@@ -37,17 +54,7 @@
             type="email"
             required
             class="w-full px-4 py-2.5 border border-border rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-colors"
-          />
-        </div>
-        <div>
-          <label class="block text-sm font-medium text-text mb-1"
-            >Mot de passe</label
-          >
-          <input
-            v-model="password"
-            type="password"
-            required
-            class="w-full px-4 py-2.5 border border-border rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-colors"
+            placeholder="admin@flamingo-cocobeach.com"
           />
         </div>
         <p v-if="error" class="text-danger text-sm">{{ error }}</p>
@@ -56,14 +63,11 @@
           :disabled="loading"
           class="w-full py-2.5 bg-gradient-to-r from-primary to-primary-dark hover:from-primary-dark hover:to-primary text-white font-medium rounded-lg transition-all disabled:opacity-50 shadow-md shadow-primary/20"
         >
-          {{ loading ? "Connexion..." : "Se connecter" }}
+          {{ loading ? "Envoi..." : "Envoyer le lien" }}
         </button>
         <div class="text-center">
-          <router-link
-            to="/forgot-password"
-            class="text-sm text-primary hover:underline"
-          >
-            Mot de passe oublié ?
+          <router-link to="/login" class="text-sm text-primary hover:underline">
+            ← Retour à la connexion
           </router-link>
         </div>
       </form>
@@ -73,31 +77,22 @@
 
 <script setup>
 import { ref } from "vue";
-import { useRouter } from "vue-router";
-import { useAuth } from "../composables/useAuth";
 import { useApi } from "../composables/useApi";
 
-const router = useRouter();
-const { login } = useAuth();
 const api = useApi();
-
 const email = ref("");
-const password = ref("");
-const error = ref("");
 const loading = ref(false);
+const sent = ref(false);
+const error = ref("");
 
-async function handleLogin() {
-  loading.value = true;
+async function handleSubmit() {
   error.value = "";
+  loading.value = true;
   try {
-    const { token } = await api.post("/auth/login", {
-      email: email.value,
-      password: password.value,
-    });
-    login(token);
-    router.push("/");
-  } catch (e) {
-    error.value = e.message;
+    await api.post("/auth/forgot-password", { email: email.value });
+    sent.value = true;
+  } catch {
+    error.value = "Une erreur est survenue. Réessayez plus tard.";
   } finally {
     loading.value = false;
   }
