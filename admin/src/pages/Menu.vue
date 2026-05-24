@@ -1,9 +1,11 @@
 <script setup>
 import { ref, computed, onMounted, watch, onUnmounted } from "vue";
 import { useApi } from "../composables/useApi";
+import { useToast } from "../composables/useToast";
 
 const ITEMS_PER_PAGE = 10;
 const api = useApi();
+const toast = useToast();
 
 const categories = ref([]);
 const activeCategory = ref(null);
@@ -31,15 +33,17 @@ const activeFilterCount = computed(() => {
 
 const showCatModal = ref(false);
 const editingCat = ref(null);
-const catForm = ref({ fr: "", en: "", order: 0 });
+const catForm = ref({ fr: "", en: "", ar: "", order: 0 });
 
 const showItemModal = ref(false);
 const editingItem = ref(null);
 const itemForm = ref({
   nameFr: "",
   nameEn: "",
+  nameAr: "",
   descFr: "",
   descEn: "",
+  descAr: "",
   priceStandard: 0,
   priceExtra: 0,
   image: null,
@@ -130,28 +134,46 @@ watch(
 function openCatModal(cat = null) {
   editingCat.value = cat;
   catForm.value = cat
-    ? { fr: cat.name.fr, en: cat.name.en || "", order: cat.order }
-    : { fr: "", en: "", order: categories.value.length };
+    ? {
+        fr: cat.name.fr,
+        en: cat.name.en || "",
+        ar: cat.name.ar || "",
+        order: cat.order,
+      }
+    : { fr: "", en: "", ar: "", order: categories.value.length };
   showCatModal.value = true;
 }
 
 async function saveCat() {
-  if (!catForm.value.fr.trim()) return;
+  if (
+    !catForm.value.fr.trim() ||
+    !catForm.value.en.trim() ||
+    !catForm.value.ar.trim()
+  ) {
+    toast.error("Les noms en français, anglais et arabe sont requis.");
+    return;
+  }
   saving.value = true;
   try {
     const data = {
-      name: { fr: catForm.value.fr, en: catForm.value.en },
+      name: {
+        fr: catForm.value.fr,
+        en: catForm.value.en,
+        ar: catForm.value.ar,
+      },
       order: catForm.value.order,
     };
     if (editingCat.value) {
       await api.put(`/menu/categories/${editingCat.value.id}`, data);
+      toast.success("Catégorie mise à jour.");
     } else {
       await api.post("/menu/categories", data);
+      toast.success("Catégorie créée.");
     }
     showCatModal.value = false;
     await loadData();
   } catch (e) {
-    error.value = e.message;
+    toast.error(e.message);
   } finally {
     saving.value = false;
   }
@@ -163,8 +185,9 @@ async function deleteCat(cat) {
     await api.del(`/menu/categories/${cat.id}`);
     if (activeCategory.value === cat.id) activeCategory.value = null;
     await loadData();
+    toast.success("Catégorie supprimée.");
   } catch (e) {
-    error.value = e.message;
+    toast.error(e.message);
   }
 }
 
@@ -177,8 +200,10 @@ function openItemModal(item = null) {
     ? {
         nameFr: item.name.fr,
         nameEn: item.name.en || "",
+        nameAr: item.name.ar || "",
         descFr: item.description?.fr || "",
         descEn: item.description?.en || "",
+        descAr: item.description?.ar || "",
         priceStandard: Number(item.priceStandard),
         priceExtra: Number(item.priceExtra),
         image: null,
@@ -189,8 +214,10 @@ function openItemModal(item = null) {
     : {
         nameFr: "",
         nameEn: "",
+        nameAr: "",
         descFr: "",
         descEn: "",
+        descAr: "",
         priceStandard: 0,
         priceExtra: 0,
         image: null,
@@ -202,7 +229,18 @@ function openItemModal(item = null) {
 }
 
 async function saveItem() {
-  if (!itemForm.value.nameFr.trim()) return;
+  if (
+    !itemForm.value.nameFr.trim() ||
+    !itemForm.value.nameEn.trim() ||
+    !itemForm.value.nameAr.trim()
+  ) {
+    toast.error("Les noms en français, anglais et arabe sont requis.");
+    return;
+  }
+  if (itemForm.value.priceStandard <= 0) {
+    toast.error("Le prix standard doit être supérieur à 0.");
+    return;
+  }
   saving.value = true;
   try {
     let imageUrl = editingItem.value?.image || null;
@@ -215,8 +253,16 @@ async function saveItem() {
       imageUrl = res.url;
     }
     const payload = {
-      name: { fr: itemForm.value.nameFr, en: itemForm.value.nameEn },
-      description: { fr: itemForm.value.descFr, en: itemForm.value.descEn },
+      name: {
+        fr: itemForm.value.nameFr,
+        en: itemForm.value.nameEn,
+        ar: itemForm.value.nameAr,
+      },
+      description: {
+        fr: itemForm.value.descFr,
+        en: itemForm.value.descEn,
+        ar: itemForm.value.descAr,
+      },
       priceStandard: Number(itemForm.value.priceStandard),
       priceExtra: Number(itemForm.value.priceExtra),
       available: itemForm.value.available,
@@ -227,13 +273,15 @@ async function saveItem() {
     };
     if (editingItem.value) {
       await api.put(`/menu/items/${editingItem.value.id}`, payload);
+      toast.success("Article mis à jour.");
     } else {
       await api.post("/menu/items", payload);
+      toast.success("Article créé.");
     }
     showItemModal.value = false;
     await loadItems();
   } catch (e) {
-    error.value = e.message;
+    toast.error(e.message);
   } finally {
     saving.value = false;
   }
@@ -244,8 +292,9 @@ async function deleteItem(item) {
   try {
     await api.del(`/menu/items/${item.id}`);
     await loadItems();
+    toast.success("Article supprimé.");
   } catch (e) {
-    error.value = e.message;
+    toast.error(e.message);
   }
 }
 
@@ -254,7 +303,7 @@ async function toggleAvailability(item) {
     await api.put(`/menu/items/${item.id}`, { available: !item.available });
     await loadItems();
   } catch (e) {
-    error.value = e.message;
+    toast.error(e.message);
   }
 }
 
@@ -263,7 +312,7 @@ async function toggleVisible(item) {
     await api.put(`/menu/items/${item.id}`, { visible: !item.visible });
     await loadItems();
   } catch (e) {
-    error.value = e.message;
+    toast.error(e.message);
   }
 }
 
@@ -910,6 +959,16 @@ onUnmounted(() => {
               </div>
               <div>
                 <label class="block text-xs font-medium text-text-muted mb-1.5"
+                  >الاسم (AR)</label
+                >
+                <input
+                  v-model="catForm.ar"
+                  dir="rtl"
+                  class="w-full px-4 py-2.5 border border-border rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none text-sm"
+                />
+              </div>
+              <div>
+                <label class="block text-xs font-medium text-text-muted mb-1.5"
                   >Ordre</label
                 >
                 <input
@@ -982,7 +1041,7 @@ onUnmounted(() => {
               </button>
             </div>
             <div class="flex-1 overflow-y-auto p-6 space-y-4">
-              <div class="grid grid-cols-2 gap-3">
+              <div class="grid grid-cols-3 gap-3">
                 <div>
                   <label
                     class="block text-xs font-medium text-text-muted mb-1.5"
@@ -1003,6 +1062,17 @@ onUnmounted(() => {
                     class="w-full px-4 py-2.5 border border-border rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none text-sm"
                   />
                 </div>
+                <div>
+                  <label
+                    class="block text-xs font-medium text-text-muted mb-1.5"
+                    >الاسم (AR)</label
+                  >
+                  <input
+                    v-model="itemForm.nameAr"
+                    dir="rtl"
+                    class="w-full px-4 py-2.5 border border-border rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none text-sm"
+                  />
+                </div>
               </div>
               <div>
                 <label class="block text-xs font-medium text-text-muted mb-1.5"
@@ -1010,6 +1080,27 @@ onUnmounted(() => {
                 >
                 <textarea
                   v-model="itemForm.descFr"
+                  rows="2"
+                  class="w-full px-4 py-2.5 border border-border rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none text-sm resize-none"
+                ></textarea>
+              </div>
+              <div>
+                <label class="block text-xs font-medium text-text-muted mb-1.5"
+                  >Description (EN)</label
+                >
+                <textarea
+                  v-model="itemForm.descEn"
+                  rows="2"
+                  class="w-full px-4 py-2.5 border border-border rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none text-sm resize-none"
+                ></textarea>
+              </div>
+              <div>
+                <label class="block text-xs font-medium text-text-muted mb-1.5"
+                  >الوصف (AR)</label
+                >
+                <textarea
+                  v-model="itemForm.descAr"
+                  dir="rtl"
                   rows="2"
                   class="w-full px-4 py-2.5 border border-border rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none text-sm resize-none"
                 ></textarea>

@@ -1,6 +1,7 @@
 import { useEffect, useState, useCallback } from "react";
 import { useSearchParams, Link } from "react-router-dom";
 import { motion } from "framer-motion";
+import { useLanguage } from "../i18n/LanguageContext";
 
 const ITEMS_PER_PAGE = 12;
 
@@ -13,6 +14,7 @@ export default function MenuPage() {
   const [totalPages, setTotalPages] = useState(1);
   const [loading, setLoading] = useState(true);
   const [itemsLoading, setItemsLoading] = useState(false);
+  const { t, localizedValue } = useLanguage();
 
   useEffect(() => {
     fetch("/api/menu/categories")
@@ -79,13 +81,13 @@ export default function MenuPage() {
             to="/"
             className="text-flamingo text-sm font-medium hover:underline"
           >
-            Retour
+            {t("common.back")}
           </Link>
           <h1 className="font-display text-6xl md:text-8xl text-gray-900 mt-4">
-            NOTRE CARTE
+            {t("menu.title")}
           </h1>
           <p className="text-gray-600 mt-4 max-w-xl mx-auto">
-            Saveurs tropicales, cocktails signatures et plats faits maison
+            {t("menu.subtitle")}
           </p>
         </div>
 
@@ -101,7 +103,7 @@ export default function MenuPage() {
                   : "bg-flamingo/10 text-gray-700 hover:bg-flamingo/20"
               }`}
             >
-              {cat.name.fr}
+              {localizedValue(cat.name)}
             </button>
           ))}
         </div>
@@ -127,7 +129,7 @@ export default function MenuPage() {
                 {item.image && (
                   <img
                     src={item.image}
-                    alt={item.name.fr}
+                    alt={localizedValue(item.name)}
                     className="w-20 h-20 rounded-xl object-cover flex-shrink-0"
                     loading="lazy"
                   />
@@ -135,20 +137,24 @@ export default function MenuPage() {
                 <div className="flex-1 min-w-0">
                   <div className="flex items-start justify-between gap-2">
                     <h3 className="font-semibold text-gray-800 group-hover:text-flamingo transition-colors">
-                      {item.name.fr}
+                      {localizedValue(item.name)}
                     </h3>
-                    <span className="text-flamingo font-bold whitespace-nowrap">
-                      {Number(item.priceStandard).toFixed(0)} DT
+                    <span
+                      className="text-flamingo font-bold whitespace-nowrap"
+                      dir="ltr"
+                    >
+                      {Number(item.priceStandard).toFixed(0)}{" "}
+                      {t("common.currency")}
                     </span>
                   </div>
-                  {item.description?.fr && (
+                  {localizedValue(item.description) && (
                     <p className="text-gray-500 text-sm mt-1 line-clamp-2">
-                      {item.description.fr}
+                      {localizedValue(item.description)}
                     </p>
                   )}
                   {!item.available && (
                     <span className="inline-block mt-2 text-xs bg-red-100 text-red-600 px-2 py-0.5 rounded">
-                      Indisponible
+                      {t("common.unavailable")}
                     </span>
                   )}
                 </div>
@@ -165,7 +171,7 @@ export default function MenuPage() {
               disabled={page === 1}
               className="px-4 py-2 rounded-lg bg-flamingo/10 text-flamingo font-medium disabled:opacity-30 disabled:cursor-not-allowed hover:bg-flamingo/20 transition"
             >
-              Precedent
+              {t("common.previous")}
             </button>
             <span className="text-gray-600 text-sm">
               {page} / {totalPages}
@@ -175,14 +181,14 @@ export default function MenuPage() {
               disabled={page === totalPages}
               className="px-4 py-2 rounded-lg bg-flamingo/10 text-flamingo font-medium disabled:opacity-30 disabled:cursor-not-allowed hover:bg-flamingo/20 transition"
             >
-              Suivant
+              {t("common.next")}
             </button>
           </div>
         )}
 
         {!loading && !itemsLoading && items.length === 0 && activeTab && (
           <p className="text-center text-gray-400 mt-8">
-            Aucun article dans cette categorie
+            {t("common.no_items")}
           </p>
         )}
       </div>

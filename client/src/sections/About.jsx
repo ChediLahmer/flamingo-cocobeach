@@ -1,55 +1,64 @@
 import { motion } from "framer-motion";
 import { useInView } from "framer-motion";
 import { useRef } from "react";
+import { useLanguage } from "../i18n/LanguageContext";
 
 export default function About({ config }) {
   const ref = useRef(null);
   const isInView = useInView(ref, { once: true, margin: "-100px" });
+  const { t, localizedValue, dir } = useLanguage();
+  const rtl = dir === "rtl";
 
   return (
     <section className="py-32 relative overflow-hidden" ref={ref}>
       {/* Background accent */}
-      <div className="absolute top-0 right-0 w-1/2 h-full bg-gradient-to-l from-flamingo/5 to-transparent" />
+      <div className="absolute top-0 end-0 w-1/2 h-full bg-gradient-to-l from-flamingo/5 to-transparent" />
 
       <div className="max-w-7xl mx-auto px-6">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
           {/* Text */}
           <motion.div
-            initial={{ opacity: 0, x: -60 }}
+            initial={{ opacity: 0, x: rtl ? 60 : -60 }}
             animate={isInView ? { opacity: 1, x: 0 } : {}}
             transition={{ duration: 0.8 }}
           >
             <span className="text-flamingo font-semibold text-sm uppercase tracking-widest">
-              Notre histoire
+              {t("about.label")}
             </span>
             <h2 className="font-display text-5xl sm:text-6xl md:text-8xl text-gray-900 mt-4 leading-none">
-              BIENVENUE AU
+              {t("about.title_1")}
               <br />
               <span className="text-transparent bg-clip-text bg-gradient-to-r from-flamingo to-tropical-orange">
-                PARADIS
+                {t("about.title_2")}
               </span>
             </h2>
             <p className="text-gray-600 text-lg mt-8 leading-relaxed max-w-lg">
-              {config.description ||
-                "Un lieu unique où la plage rencontre la fête. Des cocktails tropicaux, une cuisine savoureuse et une ambiance électrique qui vous transportera sous les tropiques."}
+              {localizedValue(config.description) ||
+                t("about.fallback_description")}
             </p>
 
             <div className="flex gap-8 mt-12">
               <div>
                 <div className="font-display text-4xl text-flamingo">∞</div>
-                <div className="text-gray-500 text-sm mt-1">Bonnes Vibes</div>
+                <div className="text-gray-500 text-sm mt-1">
+                  {t("about.stat_vibes")}
+                </div>
               </div>
               <div>
                 <div className="font-display text-4xl text-tropical-orange">
                   365
                 </div>
-                <div className="text-gray-500 text-sm mt-1">Jours / An</div>
+                <div className="text-gray-500 text-sm mt-1">
+                  {t("about.stat_days")}
+                </div>
               </div>
               <div>
                 <div className="font-display text-4xl text-tropical-teal">
                   100%
                 </div>
-                <div className="text-gray-500 text-sm mt-1">Tropical</div>
+                <div className="text-gray-500 text-sm mt-1">
+                  {t("about.stat_tropical")}
+                </div>
               </div>
             </div>
           </motion.div>
@@ -57,7 +66,7 @@ export default function About({ config }) {
           {/* Images */}
           <motion.div
             className="relative"
-            initial={{ opacity: 0, x: 60 }}
+            initial={{ opacity: 0, x: rtl ? -60 : 60 }}
             animate={isInView ? { opacity: 1, x: 0 } : {}}
             transition={{ duration: 0.8, delay: 0.2 }}
           >
@@ -76,7 +85,7 @@ export default function About({ config }) {
             </div>
 
             {/* Floating accent image */}
-            <div className="absolute -bottom-8 -left-8 w-32 h-32 sm:w-48 sm:h-48 z-20 animate-float hidden sm:block">
+            <div className="absolute -bottom-8 -start-8 w-32 h-32 sm:w-48 sm:h-48 z-20 animate-float hidden sm:block">
               {config.about_image_2 ? (
                 <img
                   src={config.about_image_2}
@@ -91,7 +100,7 @@ export default function About({ config }) {
             </div>
 
             {/* Decorative circle */}
-            <div className="absolute -top-6 -right-6 w-24 h-24 border-2 border-flamingo/30 rounded-full" />
+            <div className="absolute -top-6 -end-6 w-24 h-24 border-2 border-flamingo/30 rounded-full" />
           </motion.div>
         </div>
       </div>

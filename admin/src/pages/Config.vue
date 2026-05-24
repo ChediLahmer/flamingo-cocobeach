@@ -19,7 +19,46 @@
             <label class="block text-xs font-medium text-text-muted mb-1">{{
               field.label
             }}</label>
-            <template v-if="field.type === 'media'">
+            <template v-if="field.type === 'multilingual'">
+              <div class="space-y-2">
+                <div
+                  v-for="lang in ['fr', 'en', 'ar']"
+                  :key="lang"
+                  class="flex items-center gap-2"
+                >
+                  <span
+                    class="text-xs font-semibold uppercase text-text-muted w-6"
+                    >{{ lang }}</span
+                  >
+                  <input
+                    v-model="config[field.key][lang]"
+                    :dir="lang === 'ar' ? 'rtl' : 'ltr'"
+                    class="flex-1 px-4 py-2 border border-border rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none text-sm transition"
+                  />
+                </div>
+              </div>
+            </template>
+            <template v-else-if="field.type === 'multilingual-textarea'">
+              <div class="space-y-2">
+                <div
+                  v-for="lang in ['fr', 'en', 'ar']"
+                  :key="lang"
+                  class="flex gap-2"
+                >
+                  <span
+                    class="text-xs font-semibold uppercase text-text-muted w-6 pt-2"
+                    >{{ lang }}</span
+                  >
+                  <textarea
+                    v-model="config[field.key][lang]"
+                    :dir="lang === 'ar' ? 'rtl' : 'ltr'"
+                    class="flex-1 px-4 py-2.5 border border-border rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none text-sm transition"
+                    rows="2"
+                  ></textarea>
+                </div>
+              </div>
+            </template>
+            <template v-else-if="field.type === 'media'">
               <div class="flex items-center gap-3">
                 <label
                   class="inline-flex items-center gap-2 px-4 py-2 bg-primary/5 hover:bg-primary/10 border border-border rounded-lg cursor-pointer transition-colors text-sm font-medium text-text"
@@ -94,18 +133,32 @@
 <script setup>
 import { ref, onMounted } from "vue";
 import { useApi } from "../composables/useApi";
+import { useToast } from "../composables/useToast";
 
 const api = useApi();
+const toast = useToast();
 const config = ref({});
 const saving = ref(false);
+
+const MULTILINGUAL_KEYS = new Set([
+  "name",
+  "tagline",
+  "description",
+  "address",
+  "hours",
+]);
 
 const configGroups = [
   {
     title: "Informations générales",
     fields: [
-      { key: "name", label: "Nom du site" },
-      { key: "tagline", label: "Tagline" },
-      { key: "description", label: "Description", type: "textarea" },
+      { key: "name", label: "Nom du site", type: "multilingual" },
+      { key: "tagline", label: "Tagline", type: "multilingual" },
+      {
+        key: "description",
+        label: "Description",
+        type: "multilingual-textarea",
+      },
     ],
   },
   {
@@ -114,7 +167,7 @@ const configGroups = [
       { key: "email", label: "Email" },
       { key: "phone", label: "Téléphone" },
       { key: "whatsapp", label: "WhatsApp" },
-      { key: "address", label: "Adresse" },
+      { key: "address", label: "Adresse", type: "multilingual" },
     ],
   },
   {
@@ -128,7 +181,7 @@ const configGroups = [
   {
     title: "Horaires & Localisation",
     fields: [
-      { key: "hours", label: "Horaires" },
+      { key: "hours", label: "Horaires", type: "multilingual" },
       { key: "lat", label: "Latitude" },
       { key: "lng", label: "Longitude" },
     ],
@@ -146,7 +199,14 @@ const configGroups = [
 ];
 
 onMounted(async () => {
-  config.value = await api.get("/config");
+  const data = await api.get("/config");
+  // Ensure multilingual keys are objects
+  for (const key of MULTILINGUAL_KEYS) {
+    if (!data[key] || typeof data[key] !== "object") {
+      data[key] = { fr: data[key] || "", en: "", ar: "" };
+    }
+  }
+  config.value = data;
 });
 
 async function uploadMedia(key, e) {
@@ -159,9 +219,21 @@ async function uploadMedia(key, e) {
 }
 
 async function save() {
+  for (const key of MULTILINGUAL_KEYS) {
+    const val = config.value[key];
+    if (!val || !val.fr?.trim() || !val.en?.trim() || !val.ar?.trim()) {
+      toast.error(
+        `Le champ "${key}" doit être rempli en français, anglais et arabe.`,
+      );
+      return;
+    }
+  }
   saving.value = true;
   try {
     await api.put("/config", config.value);
+    toast.success("Configuration enregistrée.");
+  } catch (e) {
+    toast.error(e.message || "Erreur lors de l'enregistrement.");
   } finally {
     saving.value = false;
   }

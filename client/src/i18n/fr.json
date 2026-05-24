@@ -1,0 +1,81 @@
+{
+    "nav": {
+        "home": "Accueil",
+        "menu": "La Carte",
+        "spaces": "Espaces",
+        "gallery": "Galerie",
+        "contact": "Contact"
+    },
+    "hero": {
+        "subtitle": "Beach Club & Restaurant",
+        "cta": "Découvrir",
+        "contact": "Nous Contacter",
+        "marquee": "FLAMINGO COCO BEACH • AMBIANCE TROPICALE • BAR DE PLAGE • BON MOMENTS • SOLEIL & DÉTENTE",
+        "greeting_morning": "Bonjour \u2600\ufe0f",
+        "greeting_afternoon": "Bon apr\u00e8s-midi \ud83c\udf34",
+        "greeting_evening": "Bonsoir \ud83c\udf05",
+        "greeting_night": "Bonne soir\u00e9e \ud83c\udf19"
+    },
+    "about": {
+        "label": "Notre histoire",
+        "title_1": "BIENVENUE AU",
+        "title_2": "PARADIS",
+        "fallback_description": "Un lieu unique où la plage rencontre la fête. Des cocktails tropicaux, une cuisine savoureuse et une ambiance électrique qui vous transportera sous les tropiques.",
+        "stat_vibes": "Bonnes Vibes",
+        "stat_days": "Jours / An",
+        "stat_tropical": "Tropical"
+    },
+    "menu": {
+        "title": "NOTRE CARTE",
+        "subtitle": "Saveurs tropicales",
+        "view_all": "Voir toute la carte",
+        "search_placeholder": "Rechercher un plat...",
+        "all_categories": "Toutes",
+        "no_results": "Aucun résultat trouvé",
+        "loading": "Chargement...",
+        "price_standard": "Standard",
+        "price_extra": "Extra"
+    },
+    "spaces": {
+        "title": "NOS ESPACES",
+        "subtitle": "Votre coin de paradis",
+        "view_all": "Découvrir nos espaces",
+        "capacity": "personnes",
+        "per_day": "/ jour",
+        "available": "Disponible",
+        "unavailable": "Indisponible",
+        "search_placeholder": "Rechercher un espace...",
+        "no_results": "Aucun espace trouvé"
+    },
+    "gallery": {
+        "title": "GALERIE",
+        "subtitle": "Moments capturés",
+        "all": "Tous",
+        "view_all": "Voir toute la galerie"
+    },
+    "contact": {
+        "title": "CONTACT",
+        "label": "Rejoignez-nous",
+        "subtitle": "Retrouvez-nous",
+        "address_label": "Adresse",
+        "hours_label": "Horaires",
+        "phone_label": "Téléphone",
+        "email_label": "Email",
+        "map_soon": "Carte bientôt disponible"
+    },
+    "footer": {
+        "rights": "Tous droits réservés"
+    },
+    "common": {
+        "currency": "DT",
+        "loading": "Chargement...",
+        "error": "Une erreur est survenue",
+        "back": "Retour",
+        "previous": "Précédent",
+        "next": "Suivant",
+        "unavailable": "Indisponible",
+        "no_items": "Aucun article pour le moment",
+        "all_loaded": "Toutes les photos sont affichées",
+        "empty_gallery": "Galerie vide pour le moment"
+    }
+}

@@ -1,17 +1,18 @@
 import { motion } from "framer-motion";
 import { useMemo } from "react";
+import { useLanguage } from "../i18n/LanguageContext";
 
-function useGreeting() {
-  return useMemo(() => {
-    const h = new Date().getHours();
-    if (h < 12) return "Bonjour ☀️";
-    if (h < 18) return "Bon après-midi 🌴";
-    return "Bonsoir 🌙";
-  }, []);
+function getGreetingKey() {
+  const hour = new Date().getHours();
+  if (hour >= 5 && hour < 12) return "hero.greeting_morning";
+  if (hour >= 12 && hour < 17) return "hero.greeting_afternoon";
+  if (hour >= 17 && hour < 21) return "hero.greeting_evening";
+  return "hero.greeting_night";
 }
 
 export default function Hero({ config }) {
-  const greeting = useGreeting();
+  const { t, localizedValue } = useLanguage();
+  const greeting = useMemo(() => t(getGreetingKey()), [t]);
   return (
     <section
       id="hero"
@@ -59,21 +60,30 @@ export default function Hero({ config }) {
         </motion.div>
 
         <motion.p
+          className="text-xl sm:text-2xl md:text-3xl text-white font-light mb-2"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 1.65, duration: 0.8 }}
+        >
+          {greeting}
+        </motion.p>
+
+        <motion.p
           className="text-lg sm:text-xl text-white/60 font-light tracking-widest uppercase mb-4"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 1.7, duration: 0.8 }}
         >
-          {greeting}
+          {t("hero.subtitle")}
         </motion.p>
 
         <motion.h1
-          className="font-display text-5xl sm:text-7xl md:text-[10rem] leading-none text-white tracking-wider"
+          className="font-display text-4xl sm:text-6xl md:text-8xl leading-none text-white tracking-wider"
           initial={{ opacity: 0, y: 60 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 1.8, duration: 1 }}
         >
-          FLAMINGO
+          {localizedValue(config.name) || "FLAMINGO"}
         </motion.h1>
 
         <motion.p
@@ -82,7 +92,7 @@ export default function Hero({ config }) {
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 2.2, duration: 0.8 }}
         >
-          {config.tagline || "Le paradis tropical qui prend vie"}
+          {localizedValue(config.tagline) || t("hero.subtitle")}
         </motion.p>
 
         <motion.div
@@ -95,13 +105,13 @@ export default function Hero({ config }) {
             href="#menu"
             className="px-8 py-4 bg-flamingo hover:bg-flamingo-dark text-white font-semibold rounded-full transition-all hover:scale-105 text-lg"
           >
-            Découvrir le Menu
+            {t("hero.cta")}
           </a>
           <a
             href="#contact"
             className="px-8 py-4 border-2 border-white/40 hover:border-flamingo text-white rounded-full transition-all hover:scale-105 text-lg"
           >
-            Nous Contacter
+            {t("hero.contact")}
           </a>
         </motion.div>
       </div>
@@ -127,8 +137,7 @@ export default function Hero({ config }) {
                 key={i}
                 className="mx-8 text-white font-bold text-sm uppercase tracking-widest"
               >
-                🦩 FLAMINGO COCO BEACH • TROPICAL VIBES • BEACH BAR • GOOD TIMES
-                • SUN & FUN 🦩
+                🦩 {t("hero.marquee")} 🦩
               </span>
             ))}
         </div>

@@ -1,9 +1,11 @@
 <script setup>
 import { ref, computed, onMounted, watch } from "vue";
 import { useApi } from "../composables/useApi";
+import { useToast } from "../composables/useToast";
 
 const ITEMS_PER_PAGE = 9;
 const api = useApi();
+const toast = useToast();
 const spaces = ref([]);
 const showForm = ref(false);
 const editing = ref(null);
@@ -31,7 +33,10 @@ const activeFilterCount = computed(() => {
 const form = ref({
   nameFr: "",
   nameEn: "",
+  nameAr: "",
   descFr: "",
+  descEn: "",
+  descAr: "",
   price: 0,
   capacity: 1,
   image: null,
@@ -100,7 +105,10 @@ function openForm(space = null) {
     form.value = {
       nameFr: space.name.fr,
       nameEn: space.name.en || "",
+      nameAr: space.name.ar || "",
       descFr: space.description?.fr || "",
+      descEn: space.description?.en || "",
+      descAr: space.description?.ar || "",
       price: Number(space.price),
       capacity: space.capacity,
       image: null,
@@ -111,7 +119,10 @@ function openForm(space = null) {
     form.value = {
       nameFr: "",
       nameEn: "",
+      nameAr: "",
       descFr: "",
+      descEn: "",
+      descAr: "",
       price: 0,
       capacity: 1,
       image: null,
@@ -131,7 +142,22 @@ function onFileChange(e) {
 }
 
 async function save() {
-  if (!form.value.nameFr.trim()) return;
+  if (
+    !form.value.nameFr.trim() ||
+    !form.value.nameEn.trim() ||
+    !form.value.nameAr.trim()
+  ) {
+    toast.error("Les noms en français, anglais et arabe sont requis.");
+    return;
+  }
+  if (form.value.price < 0) {
+    toast.error("Le prix ne peut pas être négatif.");
+    return;
+  }
+  if (form.value.capacity < 1) {
+    toast.error("La capacité doit être au moins 1.");
+    return;
+  }
   saving.value = true;
   try {
     let imageUrl = editing.value?.image || null;
@@ -144,8 +170,16 @@ async function save() {
       imageUrl = res.url;
     }
     const data = {
-      name: { fr: form.value.nameFr, en: form.value.nameEn },
-      description: { fr: form.value.descFr },
+      name: {
+        fr: form.value.nameFr,
+        en: form.value.nameEn,
+        ar: form.value.nameAr,
+      },
+      description: {
+        fr: form.value.descFr,
+        en: form.value.descEn,
+        ar: form.value.descAr,
+      },
       price: form.value.price,
       capacity: form.value.capacity,
       image: imageUrl,
@@ -154,13 +188,15 @@ async function save() {
     };
     if (editing.value) {
       await api.put(`/spaces/${editing.value.id}`, data);
+      toast.success("Espace mis à jour.");
     } else {
       await api.post("/spaces", data);
+      toast.success("Espace créé.");
     }
     showForm.value = false;
     await load();
   } catch (e) {
-    error.value = e.message;
+    toast.error(e.message);
   } finally {
     saving.value = false;
   }
@@ -171,8 +207,9 @@ async function remove(space) {
   try {
     await api.del(`/spaces/${space.id}`);
     await load();
+    toast.success("Espace supprimé.");
   } catch (e) {
-    error.value = e.message;
+    toast.error(e.message);
   }
 }
 
@@ -662,7 +699,7 @@ async function toggleVisible(space) {
               </button>
             </div>
             <div class="flex-1 overflow-y-auto p-6 space-y-4">
-              <div class="grid grid-cols-2 gap-3">
+              <div class="grid grid-cols-3 gap-3">
                 <div>
                   <label
                     class="block text-xs font-medium text-text-muted mb-1.5"
@@ -683,6 +720,17 @@ async function toggleVisible(space) {
                     class="w-full px-4 py-2.5 border border-border rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none text-sm"
                   />
                 </div>
+                <div>
+                  <label
+                    class="block text-xs font-medium text-text-muted mb-1.5"
+                    >الاسم (AR)</label
+                  >
+                  <input
+                    v-model="form.nameAr"
+                    dir="rtl"
+                    class="w-full px-4 py-2.5 border border-border rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none text-sm"
+                  />
+                </div>
               </div>
               <div>
                 <label class="block text-xs font-medium text-text-muted mb-1.5"
@@ -690,6 +738,27 @@ async function toggleVisible(space) {
                 >
                 <textarea
                   v-model="form.descFr"
+                  rows="3"
+                  class="w-full px-4 py-2.5 border border-border rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none text-sm resize-none"
+                ></textarea>
+              </div>
+              <div>
+                <label class="block text-xs font-medium text-text-muted mb-1.5"
+                  >Description (EN)</label
+                >
+                <textarea
+                  v-model="form.descEn"
+                  rows="3"
+                  class="w-full px-4 py-2.5 border border-border rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none text-sm resize-none"
+                ></textarea>
+              </div>
+              <div>
+                <label class="block text-xs font-medium text-text-muted mb-1.5"
+                  >الوصف (AR)</label
+                >
+                <textarea
+                  v-model="form.descAr"
+                  dir="rtl"
                   rows="3"
                   class="w-full px-4 py-2.5 border border-border rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none text-sm resize-none"
                 ></textarea>

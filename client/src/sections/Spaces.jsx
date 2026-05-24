@@ -1,15 +1,18 @@
 import { motion, useInView } from "framer-motion";
 import { useRef, useState, useEffect } from "react";
+import { useLanguage } from "../i18n/LanguageContext";
 
 export default function Spaces() {
   const ref = useRef(null);
   const isInView = useInView(ref, { once: true, margin: "-100px" });
   const [spaces, setSpaces] = useState([]);
+  const { t, localizedValue } = useLanguage();
 
   useEffect(() => {
     fetch("/api/spaces")
       .then((r) => r.json())
-      .then((data) => setSpaces(data.items || []));
+      .then((data) => setSpaces(data.items || []))
+      .catch(() => {});
   }, []);
 
   return (
@@ -25,15 +28,11 @@ export default function Spaces() {
           transition={{ duration: 0.7 }}
         >
           <span className="text-tropical-teal font-semibold text-sm uppercase tracking-widest">
-            Vos Espaces
+            {t("spaces.subtitle")}
           </span>
           <h2 className="font-display text-6xl md:text-9xl text-gray-900 mt-4">
-            NOS ESPACES
+            {t("spaces.title")}
           </h2>
-          <p className="text-gray-600 text-lg mt-4 max-w-2xl mx-auto">
-            Des coins de paradis pensés pour chaque moment — détente, fête ou
-            évasion
-          </p>
         </motion.div>
 
         {/* Spaces grid */}
@@ -52,7 +51,7 @@ export default function Spaces() {
                 {space.image ? (
                   <img
                     src={space.image}
-                    alt={space.name.fr}
+                    alt={localizedValue(space.name)}
                     className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
                   />
                 ) : (
@@ -68,25 +67,25 @@ export default function Spaces() {
               {/* Content */}
               <div className="absolute bottom-0 left-0 right-0 p-6">
                 <h3 className="font-display text-3xl text-white">
-                  {space.name.fr}
+                  {localizedValue(space.name)}
                 </h3>
-                {space.description?.fr && (
+                {localizedValue(space.description) && (
                   <p className="text-white/60 text-sm mt-2 line-clamp-2">
-                    {space.description.fr}
+                    {localizedValue(space.description)}
                   </p>
                 )}
                 <div className="flex items-center gap-4 mt-4">
-                  <span className="text-flamingo font-bold">
-                    {Number(space.price).toFixed(0)} DT
+                  <span className="text-flamingo font-bold" dir="ltr">
+                    {Number(space.price).toFixed(0)} {t("common.currency")}
                   </span>
                   <span className="text-white/40 text-sm">
-                    · {space.capacity} personnes
+                    · {space.capacity} {t("spaces.capacity")}
                   </span>
                 </div>
               </div>
 
               {/* Status badge */}
-              <div className="absolute top-4 right-4">
+              <div className="absolute top-4 end-4">
                 <span
                   className={`px-3 py-1 rounded-full text-xs font-medium ${
                     space.available
@@ -94,7 +93,9 @@ export default function Spaces() {
                       : "bg-red-500/80 text-white"
                   }`}
                 >
-                  {space.available ? "Disponible" : "Complet"}
+                  {space.available
+                    ? t("spaces.available")
+                    : t("spaces.unavailable")}
                 </span>
               </div>
             </motion.div>

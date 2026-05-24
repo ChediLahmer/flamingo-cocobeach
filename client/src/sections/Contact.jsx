@@ -1,9 +1,12 @@
 import { motion, useInView } from "framer-motion";
 import { useRef } from "react";
+import { useLanguage } from "../i18n/LanguageContext";
 
 export default function Contact({ config }) {
   const ref = useRef(null);
   const isInView = useInView(ref, { once: true, margin: "-100px" });
+  const { t, localizedValue, dir } = useLanguage();
+  const rtl = dir === "rtl";
 
   return (
     <section id="contact" className="py-32 relative" ref={ref}>
@@ -18,10 +21,10 @@ export default function Contact({ config }) {
           transition={{ duration: 0.7 }}
         >
           <span className="text-tropical-yellow font-semibold text-sm uppercase tracking-widest">
-            Rejoignez-nous
+            {t("contact.label")}
           </span>
           <h2 className="font-display text-5xl sm:text-6xl md:text-9xl text-gray-900 mt-4">
-            CONTACT
+            {t("contact.title")}
           </h2>
         </motion.div>
 
@@ -29,7 +32,7 @@ export default function Contact({ config }) {
           {/* Contact info */}
           <motion.div
             className="space-y-8"
-            initial={{ opacity: 0, x: -40 }}
+            initial={{ opacity: 0, x: rtl ? 40 : -40 }}
             animate={isInView ? { opacity: 1, x: 0 } : {}}
             transition={{ delay: 0.2, duration: 0.7 }}
           >
@@ -55,9 +58,11 @@ export default function Contact({ config }) {
                 </svg>
               </div>
               <div>
-                <h3 className="font-semibold text-gray-800">Adresse</h3>
+                <h3 className="font-semibold text-gray-800">
+                  {t("contact.address_label")}
+                </h3>
                 <p className="text-gray-600 mt-1">
-                  {config.address || "Coco Beach, Tunisie"}
+                  {localizedValue(config.address) || "Coco Beach, Tunisie"}
                 </p>
               </div>
             </div>
@@ -79,8 +84,12 @@ export default function Contact({ config }) {
                 </svg>
               </div>
               <div>
-                <h3 className="font-semibold text-gray-800">Téléphone</h3>
-                <p className="text-gray-600 mt-1">{config.phone || "—"}</p>
+                <h3 className="font-semibold text-gray-800">
+                  {t("contact.phone_label")}
+                </h3>
+                <p className="text-gray-600 mt-1" dir="ltr">
+                  {config.phone || "—"}
+                </p>
               </div>
             </div>
 
@@ -101,8 +110,12 @@ export default function Contact({ config }) {
                 </svg>
               </div>
               <div>
-                <h3 className="font-semibold text-gray-800">Horaires</h3>
-                <p className="text-gray-600 mt-1">{config.hours || "—"}</p>
+                <h3 className="font-semibold text-gray-800">
+                  {t("contact.hours_label")}
+                </h3>
+                <p className="text-gray-600 mt-1">
+                  {localizedValue(config.hours) || "—"}
+                </p>
               </div>
             </div>
 
@@ -178,7 +191,7 @@ export default function Contact({ config }) {
           {/* Map / Visual */}
           <motion.div
             className="rounded-3xl overflow-hidden h-96 lg:h-auto min-h-[400px]"
-            initial={{ opacity: 0, x: 40 }}
+            initial={{ opacity: 0, x: rtl ? -40 : 40 }}
             animate={isInView ? { opacity: 1, x: 0 } : {}}
             transition={{ delay: 0.4, duration: 0.7 }}
           >
@@ -194,7 +207,7 @@ export default function Contact({ config }) {
               <div className="w-full h-full bg-gradient-to-br from-tropical-teal/10 to-ocean-light/10 flex items-center justify-center rounded-3xl border border-flamingo/10">
                 <div className="text-center">
                   <span className="text-6xl">🗺️</span>
-                  <p className="text-gray-400 mt-2">Carte bientôt disponible</p>
+                  <p className="text-gray-400 mt-2">{t("contact.map_soon")}</p>
                 </div>
               </div>
             )}

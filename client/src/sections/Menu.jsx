@@ -1,11 +1,13 @@
 import { motion, useInView } from "framer-motion";
 import { useRef, useState, useEffect } from "react";
+import { useLanguage } from "../i18n/LanguageContext";
 
 export default function Menu() {
   const ref = useRef(null);
   const isInView = useInView(ref, { once: true, margin: "-100px" });
   const [categories, setCategories] = useState([]);
   const [activeTab, setActiveTab] = useState(null);
+  const { t, localizedValue } = useLanguage();
 
   useEffect(() => {
     fetch("/api/menu/categories")
@@ -13,7 +15,8 @@ export default function Menu() {
       .then((data) => {
         setCategories(data);
         if (data.length > 0) setActiveTab(data[0].id);
-      });
+      })
+      .catch(() => {});
   }, []);
 
   const activeCategory = categories.find((c) => c.id === activeTab);
@@ -29,10 +32,10 @@ export default function Menu() {
           transition={{ duration: 0.7 }}
         >
           <span className="text-flamingo font-semibold text-sm uppercase tracking-widest">
-            Saveurs Tropicales
+            {t("menu.subtitle")}
           </span>
           <h2 className="font-display text-6xl md:text-9xl text-gray-900 mt-4">
-            NOTRE CARTE
+            {t("menu.title")}
           </h2>
         </motion.div>
 
@@ -53,7 +56,7 @@ export default function Menu() {
                   : "bg-flamingo/10 text-gray-700 hover:bg-flamingo/20 hover:text-gray-900"
               }`}
             >
-              {cat.name.fr}
+              {localizedValue(cat.name)}
             </button>
           ))}
         </motion.div>
@@ -76,22 +79,26 @@ export default function Menu() {
               {item.image && (
                 <img
                   src={item.image}
-                  alt={item.name.fr}
+                  alt={localizedValue(item.name)}
                   className="w-20 h-20 rounded-xl object-cover flex-shrink-0"
                 />
               )}
               <div className="flex-1 min-w-0">
                 <div className="flex items-start justify-between gap-2">
                   <h3 className="font-semibold text-gray-800 group-hover:text-flamingo transition-colors">
-                    {item.name.fr}
+                    {localizedValue(item.name)}
                   </h3>
-                  <span className="text-flamingo font-bold whitespace-nowrap">
-                    {Number(item.priceStandard).toFixed(0)} DT
+                  <span
+                    className="text-flamingo font-bold whitespace-nowrap"
+                    dir="ltr"
+                  >
+                    {Number(item.priceStandard).toFixed(0)}{" "}
+                    {t("common.currency")}
                   </span>
                 </div>
-                {item.description?.fr && (
+                {localizedValue(item.description) && (
                   <p className="text-gray-500 text-sm mt-1 line-clamp-2">
-                    {item.description.fr}
+                    {localizedValue(item.description)}
                   </p>
                 )}
               </div>
@@ -101,7 +108,7 @@ export default function Menu() {
 
         {activeCategory?.items?.length === 0 && (
           <p className="text-center text-gray-400 mt-8">
-            Aucun article dans cette catégorie
+            {t("menu.no_results")}
           </p>
         )}
       </div>

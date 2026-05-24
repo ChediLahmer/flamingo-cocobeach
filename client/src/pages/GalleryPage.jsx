@@ -1,6 +1,7 @@
 import { useEffect, useState, useCallback, useRef } from "react";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
+import { useLanguage } from "../i18n/LanguageContext";
 
 const BATCH_SIZE = 20;
 
@@ -8,6 +9,7 @@ export default function GalleryPage() {
   const [images, setImages] = useState([]);
   const [categories, setCategories] = useState([]);
   const [activeFilter, setActiveFilter] = useState(null);
+  const { localizedValue, t } = useLanguage();
   const [lightbox, setLightbox] = useState(null);
   const [cursor, setCursor] = useState(null);
   const [hasMore, setHasMore] = useState(true);
@@ -16,7 +18,6 @@ export default function GalleryPage() {
 
   const loadImages = useCallback(
     async (reset = false) => {
-      if (loading) return;
       setLoading(true);
       try {
         const params = new URLSearchParams({ limit: BATCH_SIZE });
@@ -38,13 +39,14 @@ export default function GalleryPage() {
         setLoading(false);
       }
     },
-    [activeFilter, cursor, loading],
+    [activeFilter, cursor],
   );
 
   useEffect(() => {
     fetch("/api/gallery/categories")
       .then((r) => r.json())
-      .then(setCategories);
+      .then(setCategories)
+      .catch(() => {});
   }, []);
 
   useEffect(() => {
@@ -59,12 +61,14 @@ export default function GalleryPage() {
         setImages(data.items || []);
         setCursor(data.nextCursor);
         setHasMore(!!data.nextCursor);
-      });
+      })
+      .catch(() => {});
   }, [activeFilter]);
 
   // Infinite scroll via IntersectionObserver
   useEffect(() => {
     if (!sentinelRef.current) return;
+    const el = sentinelRef.current;
     const observer = new IntersectionObserver(
       (entries) => {
         if (entries[0].isIntersecting && hasMore && !loading) {
@@ -73,7 +77,7 @@ export default function GalleryPage() {
       },
       { rootMargin: "200px" },
     );
-    observer.observe(sentinelRef.current);
+    observer.observe(el);
     return () => observer.disconnect();
   }, [hasMore, loading, loadImages]);
 
@@ -86,13 +90,13 @@ export default function GalleryPage() {
             to="/"
             className="text-flamingo text-sm font-medium hover:underline"
           >
-            Retour
+            {t("common.back")}
           </Link>
           <h1 className="font-display text-6xl md:text-8xl text-gray-900 mt-4">
-            GALERIE
+            {t("gallery.title")}
           </h1>
           <p className="text-gray-600 mt-4 max-w-xl mx-auto">
-            Revivez les meilleurs moments du Flamingo Coco Beach
+            {t("gallery.subtitle")}
           </p>
         </div>
 
@@ -106,7 +110,7 @@ export default function GalleryPage() {
                 : "bg-tropical-orange/10 text-gray-700 hover:bg-tropical-orange/20"
             }`}
           >
-            Toutes
+            {t("gallery.all")}
           </button>
           {categories.map((cat) => (
             <button
@@ -118,7 +122,7 @@ export default function GalleryPage() {
                   : "bg-tropical-orange/10 text-gray-700 hover:bg-tropical-orange/20"
               }`}
             >
-              {cat.name.fr}
+              {localizedValue(cat.name)}
             </button>
           ))}
         </div>
@@ -158,13 +162,13 @@ export default function GalleryPage() {
 
         {!hasMore && images.length > 0 && (
           <p className="text-center text-gray-400 text-sm mt-8">
-            Toutes les photos sont affichees
+            {t("common.all_loaded")}
           </p>
         )}
 
         {!loading && images.length === 0 && (
           <p className="text-center text-gray-400 mt-8">
-            Galerie vide pour le moment
+            {t("common.empty_gallery")}
           </p>
         )}
       </div>
@@ -187,7 +191,7 @@ export default function GalleryPage() {
           />
           <button
             onClick={() => setLightbox(null)}
-            className="absolute top-6 right-6 text-white text-3xl hover:text-flamingo"
+            className="absolute top-6 end-6 text-white text-3xl hover:text-flamingo"
           >
             x
           </button>

@@ -1,4 +1,7 @@
+import { useLanguage } from "../i18n/LanguageContext";
+
 export default function Footer({ config }) {
+  const { t, localizedValue } = useLanguage();
   return (
     <footer className="bg-gradient-to-b from-flamingo-dark to-[#1a0a12] py-16">
       <div className="max-w-7xl mx-auto px-6">
@@ -7,10 +10,12 @@ export default function Footer({ config }) {
             <span className="text-4xl">🦩</span>
             <div>
               <span className="font-display text-3xl text-white block leading-tight">
-                {config.name || "FLAMINGO"}
+                {localizedValue(config.name) || "FLAMINGO"}
               </span>
               {config.phone && (
-                <span className="text-white/40 text-xs">{config.phone}</span>
+                <span className="text-white/40 text-xs" dir="ltr">
+                  {config.phone}
+                </span>
               )}
             </div>
           </div>
@@ -85,8 +90,9 @@ export default function Footer({ config }) {
 
         <div className="mt-10 pt-8 border-t border-white/10 flex flex-col sm:flex-row items-center justify-between gap-4 text-white/40 text-sm">
           <span>
-            © {new Date().getFullYear()} {config.name || "Flamingo Coco Beach"}.
-            Tous droits réservés.
+            © {new Date().getFullYear()}{" "}
+            {localizedValue(config.name) || "Flamingo Coco Beach"}.
+            {t("footer.rights")}.
           </span>
           <span>Designed with ☀️ & 🦩 vibes</span>
         </div>

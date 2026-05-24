@@ -1,9 +1,11 @@
 <script setup>
 import { ref, computed, onMounted, watch } from "vue";
 import { useApi } from "../composables/useApi";
+import { useToast } from "../composables/useToast";
 
 const ITEMS_PER_PAGE = 24;
 const api = useApi();
+const toast = useToast();
 const categories = ref([]);
 const allImages = ref([]);
 const selectedCat = ref(null);
@@ -13,7 +15,7 @@ const uploading = ref(false);
 const uploadProgress = ref("");
 const uploadTotal = ref(0);
 const uploadCurrent = ref(0);
-const catForm = ref({ fr: "", en: "" });
+const catForm = ref({ fr: "", en: "", ar: "" });
 const loading = ref(false);
 const error = ref(null);
 const page = ref(1);
@@ -65,6 +67,7 @@ async function onFiles(e) {
   uploading.value = true;
   uploadTotal.value = files.length;
   uploadCurrent.value = 0;
+  let failCount = 0;
   for (let i = 0; i < files.length; i++) {
     uploadCurrent.value = i + 1;
     uploadProgress.value = `${i + 1}/${files.length}`;
@@ -74,12 +77,14 @@ async function onFiles(e) {
     try {
       await api.upload("/gallery", fd);
     } catch (e) {
-      error.value = `Erreur upload fichier ${i + 1}: ${e.message}`;
+      failCount++;
+      toast.error(`Erreur upload fichier ${i + 1}: ${e.message}`);
     }
   }
   uploading.value = false;
   uploadProgress.value = "";
   await loadImages();
+  if (failCount === 0) toast.success(`${files.length} image(s) ajoutée(s).`);
 }
 
 async function toggleVisibility(img) {
@@ -87,7 +92,7 @@ async function toggleVisibility(img) {
     await api.put(`/gallery/${img.id}`, { visible: !img.visible });
     await loadImages();
   } catch (e) {
-    error.value = e.message;
+    toast.error(e.message);
   }
 }
 
@@ -96,22 +101,35 @@ async function deleteImage(img) {
   try {
     await api.del(`/gallery/${img.id}`);
     await loadImages();
+    toast.success("Image supprimée.");
   } catch (e) {
-    error.value = e.message;
+    toast.error(e.message);
   }
 }
 
 async function saveCat() {
-  if (!catForm.value.fr.trim()) return;
+  if (
+    !catForm.value.fr.trim() ||
+    !catForm.value.en.trim() ||
+    !catForm.value.ar.trim()
+  ) {
+    toast.error("Les noms en français, anglais et arabe sont requis.");
+    return;
+  }
   try {
     await api.post("/gallery/categories", {
-      name: { fr: catForm.value.fr, en: catForm.value.en },
+      name: {
+        fr: catForm.value.fr,
+        en: catForm.value.en,
+        ar: catForm.value.ar,
+      },
     });
     showCatForm.value = false;
-    catForm.value = { fr: "", en: "" };
+    catForm.value = { fr: "", en: "", ar: "" };
     await loadCategories();
+    toast.success("Catégorie créée.");
   } catch (e) {
-    error.value = e.message;
+    toast.error(e.message);
   }
 }
 
@@ -121,8 +139,9 @@ async function deleteCat(cat) {
     await api.del(`/gallery/categories/${cat.id}`);
     await loadCategories();
     if (selectedCat.value === cat.id) selectedCat.value = null;
+    toast.success("Catégorie supprimée.");
   } catch (e) {
-    error.value = e.message;
+    toast.error(e.message);
   }
 }
 </script>
@@ -430,10 +449,20 @@ async function deleteCat(cat) {
               </div>
               <div>
                 <label class="block text-xs font-medium text-text-muted mb-1.5"
-                  >Name (EN)</label
+                  >Name (EN) *</label
                 >
                 <input
                   v-model="catForm.en"
+                  class="w-full px-4 py-2.5 border border-border rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none text-sm"
+                />
+              </div>
+              <div>
+                <label class="block text-xs font-medium text-text-muted mb-1.5"
+                  >الاسم (AR) *</label
+                >
+                <input
+                  v-model="catForm.ar"
+                  dir="rtl"
                   class="w-full px-4 py-2.5 border border-border rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none text-sm"
                 />
               </div>

@@ -1,6 +1,7 @@
 import { useEffect, useState, useCallback } from "react";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
+import { useLanguage } from "../i18n/LanguageContext";
 
 const ITEMS_PER_PAGE = 6;
 
@@ -9,6 +10,7 @@ export default function SpacesPage() {
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [loading, setLoading] = useState(false);
+  const { t, localizedValue } = useLanguage();
 
   const loadSpaces = useCallback(async (p = 1) => {
     setLoading(true);
@@ -36,13 +38,13 @@ export default function SpacesPage() {
             to="/"
             className="text-flamingo text-sm font-medium hover:underline"
           >
-            Retour
+            {t("common.back")}
           </Link>
           <h1 className="font-display text-6xl md:text-8xl text-gray-900 mt-4">
-            NOS ESPACES
+            {t("spaces.title")}
           </h1>
           <p className="text-gray-600 mt-4 max-w-xl mx-auto">
-            Des coins de paradis penses pour chaque moment
+            {t("spaces.subtitle")}
           </p>
         </div>
 
@@ -61,7 +63,7 @@ export default function SpacesPage() {
                 {space.image ? (
                   <img
                     src={space.image}
-                    alt={space.name.fr}
+                    alt={localizedValue(space.name)}
                     className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
                     loading="lazy"
                   />
@@ -76,24 +78,24 @@ export default function SpacesPage() {
 
               <div className="absolute bottom-0 left-0 right-0 p-6">
                 <h3 className="font-display text-3xl text-white">
-                  {space.name.fr}
+                  {localizedValue(space.name)}
                 </h3>
-                {space.description?.fr && (
-                  <p className="text-white/60 text-sm mt-2 line-clamp-2">
-                    {space.description.fr}
+                {localizedValue(space.description) && (
+                  <p className="text-gray-500 text-sm mt-2 line-clamp-2">
+                    {localizedValue(space.description)}
                   </p>
                 )}
                 <div className="flex items-center gap-4 mt-4">
-                  <span className="text-flamingo font-bold">
-                    {Number(space.price).toFixed(0)} DT
+                  <span className="text-flamingo font-bold" dir="ltr">
+                    {Number(space.price).toFixed(0)} {t("common.currency")}
                   </span>
                   <span className="text-white/40 text-sm">
-                    {space.capacity} personnes
+                    {space.capacity} {t("spaces.capacity")}
                   </span>
                 </div>
               </div>
 
-              <div className="absolute top-4 right-4">
+              <div className="absolute top-4 end-4">
                 <span
                   className={`px-3 py-1 rounded-full text-xs font-medium ${
                     space.available
@@ -101,7 +103,9 @@ export default function SpacesPage() {
                       : "bg-red-500/80 text-white"
                   }`}
                 >
-                  {space.available ? "Disponible" : "Complet"}
+                  {space.available
+                    ? t("spaces.available")
+                    : t("spaces.unavailable")}
                 </span>
               </div>
             </motion.div>
@@ -123,7 +127,7 @@ export default function SpacesPage() {
               disabled={page === 1}
               className="px-4 py-2 rounded-lg bg-flamingo/10 text-flamingo font-medium disabled:opacity-30 disabled:cursor-not-allowed hover:bg-flamingo/20 transition"
             >
-              Precedent
+              {t("common.previous")}
             </button>
             <span className="text-gray-600 text-sm">
               {page} / {totalPages}
@@ -133,14 +137,14 @@ export default function SpacesPage() {
               disabled={page === totalPages}
               className="px-4 py-2 rounded-lg bg-flamingo/10 text-flamingo font-medium disabled:opacity-30 disabled:cursor-not-allowed hover:bg-flamingo/20 transition"
             >
-              Suivant
+              {t("common.next")}
             </button>
           </div>
         )}
 
         {!loading && spaces.length === 0 && (
           <p className="text-center text-gray-400 mt-8">
-            Aucun espace disponible
+            {t("spaces.no_results")}
           </p>
         )}
       </div>

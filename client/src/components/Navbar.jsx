@@ -1,14 +1,17 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Link, useLocation } from "react-router-dom";
+import { useLanguage } from "../i18n/LanguageContext";
 
-const navLinks = [
-  { label: "Accueil", href: "/", anchor: "#hero" },
-  { label: "Menu", href: "/carte", anchor: "#menu" },
-  { label: "Espaces", href: "/espaces", anchor: "#spaces" },
-  { label: "Galerie", href: "/galerie", anchor: "#gallery" },
-  { label: "Contact", href: "/", anchor: "#contact" },
-];
+function getNavLinks(t) {
+  return [
+    { label: t("nav.home"), href: "/", anchor: "#hero" },
+    { label: t("nav.menu"), href: "/carte", anchor: "#menu" },
+    { label: t("nav.spaces"), href: "/espaces", anchor: "#spaces" },
+    { label: t("nav.gallery"), href: "/galerie", anchor: "#gallery" },
+    { label: t("nav.contact"), href: "/", anchor: "#contact" },
+  ];
+}
 
 function InstagramIcon({ className }) {
   return (
@@ -47,6 +50,8 @@ export default function Navbar({ config }) {
   const [menuOpen, setMenuOpen] = useState(false);
   const location = useLocation();
   const isHome = location.pathname === "/";
+  const { t, localizedValue, lang, switchLang } = useLanguage();
+  const navLinks = getNavLinks(t);
 
   // On sub-pages, text is always dark (readable), but bg evolves on scroll
   const solid = !isHome || scrolled;
@@ -96,23 +101,68 @@ export default function Navbar({ config }) {
         transition={{ delay: isHome ? 1.5 : 0, duration: 0.8 }}
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 flex items-center justify-between">
-          {/* Logo + Phone */}
-          <Link to="/" className="flex items-center gap-2 min-w-0">
-            <div className="min-w-0">
-              <span
-                className={`font-display text-xl sm:text-2xl tracking-wider transition-colors block leading-tight ${solid ? "text-flamingo-dark" : "text-white"}`}
-              >
-                {config.name || "FLAMINGO"}
-              </span>
-              {config.phone && (
-                <span
-                  className={`text-[0.65rem] sm:text-xs transition-colors block ${solid ? "text-gray-400" : "text-white/50"}`}
+          {/* Social Icons + Logo */}
+          <div className="flex items-center gap-4">
+            <div className="hidden sm:flex items-center gap-3">
+              {config.whatsapp && (
+                <a
+                  href={`https://wa.me/${config.whatsapp}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className={`transition-all hover:text-green-500 hover:scale-110 ${solid ? "text-gray-500" : "text-white/80"}`}
                 >
-                  {config.phone}
-                </span>
+                  <WhatsAppIcon className="w-5 h-5" />
+                </a>
+              )}
+              {config.tiktok && (
+                <a
+                  href={config.tiktok}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className={`transition-all hover:text-flamingo hover:scale-110 ${solid ? "text-gray-500" : "text-white/80"}`}
+                >
+                  <TikTokIcon className="w-5 h-5" />
+                </a>
+              )}
+              {config.facebook && (
+                <a
+                  href={config.facebook}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className={`transition-all hover:text-flamingo hover:scale-110 ${solid ? "text-gray-500" : "text-white/80"}`}
+                >
+                  <FacebookIcon className="w-5 h-5" />
+                </a>
+              )}
+              {config.instagram && (
+                <a
+                  href={config.instagram}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className={`transition-all hover:text-flamingo hover:scale-110 ${solid ? "text-gray-500" : "text-white/80"}`}
+                >
+                  <InstagramIcon className="w-5 h-5" />
+                </a>
               )}
             </div>
-          </Link>
+            <Link to="/" className="flex items-center gap-2 min-w-0">
+              <div className="min-w-0">
+                <span
+                  className={`font-display text-xl sm:text-2xl tracking-wider transition-colors block leading-tight ${solid ? "text-flamingo-dark" : "text-white"}`}
+                >
+                  {localizedValue(config.name) || "FLAMINGO"}
+                </span>
+                {config.phone && (
+                  <span
+                    dir="ltr"
+                    className={`text-[0.65rem] sm:text-xs transition-colors block ${solid ? "text-gray-400" : "text-white/50"}`}
+                  >
+                    {config.phone}
+                  </span>
+                )}
+              </div>
+            </Link>
+          </div>
 
           {/* Desktop Nav */}
           <div className="hidden lg:flex items-center gap-6 xl:gap-8">
@@ -121,49 +171,23 @@ export default function Navbar({ config }) {
             ))}
           </div>
 
-          {/* Social Icons (desktop) */}
-          {/* Social Icons */}
-          <div className="hidden sm:flex items-center gap-3">
-            {config.instagram && (
-              <a
-                href={config.instagram}
-                target="_blank"
-                rel="noopener noreferrer"
-                className={`transition-all hover:text-flamingo hover:scale-110 ${solid ? "text-gray-500" : "text-white/80"}`}
+          {/* Language Switcher */}
+          <div className="hidden sm:flex items-center gap-1">
+            {["fr", "en", "ar"].map((l) => (
+              <button
+                key={l}
+                onClick={() => switchLang(l)}
+                className={`px-2 py-1 text-xs uppercase font-semibold rounded transition-all ${
+                  lang === l
+                    ? "bg-flamingo text-white"
+                    : solid
+                      ? "text-gray-500 hover:text-flamingo"
+                      : "text-white/60 hover:text-white"
+                }`}
               >
-                <InstagramIcon className="w-5 h-5" />
-              </a>
-            )}
-            {config.facebook && (
-              <a
-                href={config.facebook}
-                target="_blank"
-                rel="noopener noreferrer"
-                className={`transition-all hover:text-flamingo hover:scale-110 ${solid ? "text-gray-500" : "text-white/80"}`}
-              >
-                <FacebookIcon className="w-5 h-5" />
-              </a>
-            )}
-            {config.tiktok && (
-              <a
-                href={config.tiktok}
-                target="_blank"
-                rel="noopener noreferrer"
-                className={`transition-all hover:text-flamingo hover:scale-110 ${solid ? "text-gray-500" : "text-white/80"}`}
-              >
-                <TikTokIcon className="w-5 h-5" />
-              </a>
-            )}
-            {config.whatsapp && (
-              <a
-                href={`https://wa.me/${config.whatsapp}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className={`transition-all hover:text-green-500 hover:scale-110 ${solid ? "text-gray-500" : "text-white/80"}`}
-              >
-                <WhatsAppIcon className="w-5 h-5" />
-              </a>
-            )}
+                {l}
+              </button>
+            ))}
           </div>
 
           {/* Mobile toggle */}
@@ -186,7 +210,7 @@ export default function Navbar({ config }) {
             exit={{ opacity: 0 }}
           >
             <span className="font-display text-2xl text-flamingo-light tracking-widest mb-4">
-              {config.name || "FLAMINGO"}
+              {localizedValue(config.name) || "FLAMINGO"}
             </span>
             {navLinks.map((link, i) => (
               <motion.div
@@ -254,6 +278,22 @@ export default function Navbar({ config }) {
             {config.phone && (
               <p className="text-white/40 text-sm mt-2">{config.phone}</p>
             )}
+            {/* Mobile Language Switcher */}
+            <div className="flex items-center gap-2 mt-4">
+              {["fr", "en", "ar"].map((l) => (
+                <button
+                  key={l}
+                  onClick={() => switchLang(l)}
+                  className={`px-3 py-1.5 text-sm uppercase font-semibold rounded transition-all ${
+                    lang === l
+                      ? "bg-flamingo text-white"
+                      : "text-white/60 hover:text-white border border-white/20"
+                  }`}
+                >
+                  {l}
+                </button>
+              ))}
+            </div>
           </motion.div>
         )}
       </AnimatePresence>

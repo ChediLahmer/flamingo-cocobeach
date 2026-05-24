@@ -12,10 +12,15 @@ export function validateMultilingual(value, fieldName, options = {}) {
   if (!value || typeof value !== "object") {
     throw new ValidationError(fieldName, `${fieldName} doit être un objet`);
   }
-  if (options.required && !value.fr) {
-    throw new ValidationError(fieldName, `${fieldName}.fr est requis`);
+  const requiredLangs = ["fr", "en", "ar"];
+  if (options.required) {
+    for (const lang of requiredLangs) {
+      if (!value[lang] || !value[lang].trim()) {
+        throw new ValidationError(fieldName, `${fieldName}.${lang} est requis`);
+      }
+    }
   }
-  for (const lang of ["fr", "en"]) {
+  for (const lang of requiredLangs) {
     if (value[lang]) {
       if (typeof value[lang] !== "string") {
         throw new ValidationError(
@@ -67,13 +72,11 @@ export async function handleValidationError(error, reply, logger) {
   if (error.code === "P2002") {
     const field = error.meta?.target?.[0] || "field";
     logger.warn({ field, code: "P2002" }, "Unique constraint violation");
-    return reply
-      .status(409)
-      .send({
-        error: "DUPLICATE_ERROR",
-        message: `Un enregistrement avec ce ${field} existe déjà`,
-        field,
-      });
+    return reply.status(409).send({
+      error: "DUPLICATE_ERROR",
+      message: `Un enregistrement avec ce ${field} existe déjà`,
+      field,
+    });
   }
   if (error.code === "P2025") {
     return reply
@@ -81,18 +84,14 @@ export async function handleValidationError(error, reply, logger) {
       .send({ error: "NOT_FOUND_ERROR", message: "Enregistrement non trouvé" });
   }
   if (error.code === "P2003") {
-    return reply
-      .status(400)
-      .send({
-        error: "FOREIGN_KEY_ERROR",
-        message: "Une référence requise n'existe pas",
-      });
+    return reply.status(400).send({
+      error: "FOREIGN_KEY_ERROR",
+      message: "Une référence requise n'existe pas",
+    });
   }
   logger.error(error, "Unhandled error");
-  return reply
-    .status(500)
-    .send({
-      error: "INTERNAL_ERROR",
-      message: "Une erreur inattendue s'est produite",
-    });
+  return reply.status(500).send({
+    error: "INTERNAL_ERROR",
+    message: "Une erreur inattendue s'est produite",
+  });
 }

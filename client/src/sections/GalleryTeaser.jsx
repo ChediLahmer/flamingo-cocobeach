@@ -1,6 +1,7 @@
 import { motion, useInView } from "framer-motion";
 import { useRef, useState, useEffect } from "react";
 import { Link } from "react-router-dom";
+import { useLanguage } from "../i18n/LanguageContext";
 
 const MAX_PREVIEW = 8;
 
@@ -8,6 +9,7 @@ export default function GalleryTeaser() {
   const ref = useRef(null);
   const isInView = useInView(ref, { once: true, margin: "-100px" });
   const [images, setImages] = useState([]);
+  const { t } = useLanguage();
 
   useEffect(() => {
     fetch(`/api/gallery?limit=${MAX_PREVIEW}`)
@@ -25,10 +27,10 @@ export default function GalleryTeaser() {
           transition={{ duration: 0.7 }}
         >
           <span className="text-tropical-orange font-semibold text-sm uppercase tracking-widest">
-            Moments Magiques
+            {t("gallery.subtitle")}
           </span>
           <h2 className="font-display text-5xl sm:text-6xl md:text-9xl text-gray-900 mt-4">
-            GALERIE
+            {t("gallery.title")}
           </h2>
         </motion.div>
 
@@ -66,7 +68,7 @@ export default function GalleryTeaser() {
             to="/galerie"
             className="inline-block px-8 py-4 bg-tropical-orange text-white font-semibold rounded-full hover:bg-tropical-orange/80 transition-colors shadow-lg"
           >
-            Voir toute la galerie
+            {t("gallery.view_all")}
           </Link>
         </motion.div>
       </div>
