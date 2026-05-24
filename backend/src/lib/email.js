@@ -1,5 +1,11 @@
 import { BrevoClient } from "@getbrevo/brevo";
 
+if (process.env.NODE_ENV === "production" && !process.env.BREVO_API_KEY) {
+  console.warn(
+    "WARNING: BREVO_API_KEY not set — password reset emails will fail",
+  );
+}
+
 const brevo = new BrevoClient({ apiKey: process.env.BREVO_API_KEY || "" });
 
 export async function sendPasswordResetEmail(toEmail, resetUrl) {

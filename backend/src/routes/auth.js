@@ -22,7 +22,11 @@ export async function authRoutes(app) {
     async (request, reply) => {
       const { email, password } = request.body;
       const admin = await prisma.admin.findUnique({ where: { email } });
-      if (!admin || !(await bcrypt.compare(password, admin.password))) {
+      const hash =
+        admin?.password ||
+        "$2b$10$invalidhashpaddingtoconsumetime00000000000000000000";
+      const valid = await bcrypt.compare(password, hash);
+      if (!admin || !valid) {
         return reply
           .status(401)
           .send({ error: "AUTH_ERROR", message: "Identifiants invalides" });

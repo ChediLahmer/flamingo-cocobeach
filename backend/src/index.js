@@ -14,11 +14,29 @@ import { uploadRoutes } from "./routes/upload.js";
 import { mediaRoutes } from "./routes/media.js";
 import { passwordResetRoutes } from "./routes/password-reset.js";
 
+if (process.env.NODE_ENV === "production") {
+  const required = [
+    "DATABASE_URL",
+    "JWT_SECRET",
+    "CORS_ORIGIN",
+    "S3_ENDPOINT",
+    "S3_ACCESS_KEY",
+    "S3_SECRET_KEY",
+    "S3_PUBLIC_URL",
+    "ADMIN_URL",
+  ];
+  const missing = required.filter((k) => !process.env[k]);
+  if (missing.length) {
+    console.error(`Missing required env vars: ${missing.join(", ")}`);
+    process.exit(1);
+  }
+}
+
 const app = Fastify({
   logger: true,
   trustProxy: process.env.TRUST_PROXY || 1,
-  requestTimeout: 600000,
-  connectionTimeout: 600000,
+  requestTimeout: Number(process.env.REQUEST_TIMEOUT_MS) || 600000,
+  connectionTimeout: Number(process.env.CONNECTION_TIMEOUT_MS) || 600000,
 });
 
 await app.register(helmet, {
