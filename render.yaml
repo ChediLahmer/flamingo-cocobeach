@@ -20,7 +20,7 @@ services:
       - key: JWT_SECRET
         generateValue: true
       - key: CORS_ORIGIN
-        value: https://flamingo-client.onrender.com,https://flamingo-admin.onrender.com
+        value: CHANGE_ME
       - key: S3_ENDPOINT
         value: CHANGE_ME
       - key: S3_ACCESS_KEY
@@ -44,7 +44,7 @@ services:
       - key: BREVO_SENDER_EMAIL
         value: noreply@flamingo-cocobeach.com
       - key: ADMIN_URL
-        value: https://flamingo-admin.onrender.com
+        value: CHANGE_ME
 
   # ─── Client (public website) ────────────────────────────
   - type: web
@@ -63,7 +63,7 @@ services:
     routes:
       - type: rewrite
         source: /api/*
-        destination: https://flamingo-api.onrender.com/api/*
+        destination: https://flamingo-api-5o24.onrender.com/api/*
       - type: rewrite
         source: /*
         destination: /index.html
@@ -88,7 +88,7 @@ services:
     routes:
       - type: rewrite
         source: /api/*
-        destination: https://flamingo-api.onrender.com/api/*
+        destination: https://flamingo-api-5o24.onrender.com/api/*
       - type: rewrite
         source: /*
         destination: /index.html
