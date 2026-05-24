@@ -2,6 +2,7 @@ import { motion, useInView } from "framer-motion";
 import { useRef, useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { useLanguage } from "../i18n/LanguageContext";
+import { GalleryTeaserSkeleton } from "../components/Skeleton";
 
 const MAX_PREVIEW = 8;
 
@@ -9,6 +10,8 @@ export default function GalleryTeaser() {
   const ref = useRef(null);
   const isInView = useInView(ref, { once: true, margin: "-100px" });
   const [images, setImages] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(false);
   const { t } = useLanguage();
 
   useEffect(() => {
@@ -18,8 +21,19 @@ export default function GalleryTeaser() {
         return r.json();
       })
       .then((d) => setImages(d.items || []))
-      .catch(() => {});
+      .catch(() => setError(true))
+      .finally(() => setLoading(false));
   }, []);
+
+  if (loading) {
+    return (
+      <section className="py-32 relative">
+        <GalleryTeaserSkeleton />
+      </section>
+    );
+  }
+
+  if (error || images.length === 0) return null;
 
   return (
     <section id="gallery" className="py-32 relative" ref={ref}>

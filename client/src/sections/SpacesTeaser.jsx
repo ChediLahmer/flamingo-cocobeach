@@ -2,6 +2,7 @@ import { motion, useInView } from "framer-motion";
 import { useRef, useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { useLanguage } from "../i18n/LanguageContext";
+import { SpacesTeaserSkeleton } from "../components/Skeleton";
 
 const MAX_PREVIEW = 3;
 
@@ -9,6 +10,8 @@ export default function SpacesTeaser() {
   const ref = useRef(null);
   const isInView = useInView(ref, { once: true, margin: "-100px" });
   const [spaces, setSpaces] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(false);
   const { t, localizedValue } = useLanguage();
 
   useEffect(() => {
@@ -18,8 +21,19 @@ export default function SpacesTeaser() {
         return r.json();
       })
       .then((data) => setSpaces(data.items || []))
-      .catch(() => {});
+      .catch(() => setError(true))
+      .finally(() => setLoading(false));
   }, []);
+
+  if (loading) {
+    return (
+      <section className="py-32 relative overflow-hidden">
+        <SpacesTeaserSkeleton />
+      </section>
+    );
+  }
+
+  if (error || spaces.length === 0) return null;
 
   return (
     <section id="spaces" className="py-32 relative overflow-hidden" ref={ref}>

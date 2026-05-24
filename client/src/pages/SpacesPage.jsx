@@ -2,6 +2,7 @@ import { useEffect, useState, useCallback } from "react";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import { useLanguage } from "../i18n/LanguageContext";
+import { SpacesPageSkeleton } from "../components/Skeleton";
 
 const ITEMS_PER_PAGE = 6;
 
@@ -9,7 +10,7 @@ export default function SpacesPage() {
   const [spaces, setSpaces] = useState([]);
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
   const { t, localizedValue } = useLanguage();
 
@@ -118,11 +119,7 @@ export default function SpacesPage() {
         </div>
 
         {/* Loading state */}
-        {loading && (
-          <div className="flex justify-center mt-8">
-            <div className="w-8 h-8 border-2 border-flamingo border-t-transparent rounded-full animate-spin" />
-          </div>
-        )}
+        {loading && spaces.length === 0 && !error && <SpacesPageSkeleton />}
 
         {/* Error state */}
         {error && !loading && (

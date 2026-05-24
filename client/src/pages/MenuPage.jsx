@@ -2,6 +2,7 @@ import { useEffect, useState, useCallback } from "react";
 import { useSearchParams, Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import { useLanguage } from "../i18n/LanguageContext";
+import { MenuPageSkeleton } from "../components/Skeleton";
 
 const ITEMS_PER_PAGE = 12;
 
@@ -117,9 +118,24 @@ export default function MenuPage() {
         </div>
 
         {/* Loading */}
-        {(loading || itemsLoading) && !error && (
-          <div className="flex justify-center mt-12">
-            <div className="w-8 h-8 border-2 border-flamingo border-t-transparent rounded-full animate-spin" />
+        {loading && categories.length === 0 && !error && <MenuPageSkeleton />}
+
+        {/* Items loading */}
+        {!loading && itemsLoading && !error && (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 max-w-6xl mx-auto animate-pulse">
+            {[1, 2, 3, 4, 5, 6].map((i) => (
+              <div
+                key={i}
+                className="flex gap-4 p-4 rounded-2xl border border-gray-100"
+              >
+                <div className="w-20 h-20 rounded-xl bg-gray-200/80 flex-shrink-0" />
+                <div className="flex-1 space-y-3 py-1">
+                  <div className="h-4 w-3/4 rounded-full bg-gray-200/80" />
+                  <div className="h-3 w-full rounded-full bg-gray-200/80" />
+                  <div className="h-3 w-1/3 rounded-full bg-gray-200/80" />
+                </div>
+              </div>
+            ))}
           </div>
         )}
 

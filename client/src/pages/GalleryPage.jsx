@@ -2,6 +2,7 @@ import { useEffect, useState, useCallback, useRef } from "react";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import { useLanguage } from "../i18n/LanguageContext";
+import { GalleryPageSkeleton } from "../components/Skeleton";
 
 const BATCH_SIZE = 20;
 
@@ -135,6 +136,9 @@ export default function GalleryPage() {
             </button>
           ))}
         </div>
+
+        {/* Initial loading skeleton */}
+        {loading && images.length === 0 && <GalleryPageSkeleton />}
 
         {/* Masonry grid */}
         <div className="columns-2 md:columns-3 lg:columns-4 gap-4 space-y-4">

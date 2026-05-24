@@ -2,6 +2,7 @@ import { motion, useInView } from "framer-motion";
 import { useRef, useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { useLanguage } from "../i18n/LanguageContext";
+import { MenuTeaserSkeleton } from "../components/Skeleton";
 
 const MAX_PREVIEW = 4;
 
@@ -10,6 +11,8 @@ export default function MenuTeaser() {
   const isInView = useInView(ref, { once: true, margin: "-100px" });
   const [categories, setCategories] = useState([]);
   const [activeTab, setActiveTab] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(false);
   const { t, localizedValue } = useLanguage();
 
   useEffect(() => {
@@ -22,8 +25,19 @@ export default function MenuTeaser() {
         setCategories(data);
         if (data.length > 0) setActiveTab(data[0].id);
       })
-      .catch(() => {});
+      .catch(() => setError(true))
+      .finally(() => setLoading(false));
   }, []);
+
+  if (loading) {
+    return (
+      <section className="py-32 relative">
+        <MenuTeaserSkeleton />
+      </section>
+    );
+  }
+
+  if (error || categories.length === 0) return null;
 
   const activeCategory = categories.find((c) => c.id === activeTab);
   const previewItems = (activeCategory?.items || []).slice(0, MAX_PREVIEW);
