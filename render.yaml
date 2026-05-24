@@ -16,21 +16,21 @@ services:
     startCommand: npm start
     envVars:
       - key: DATABASE_URL
-        sync: false
+        value: CHANGE_ME
       - key: JWT_SECRET
         generateValue: true
       - key: CORS_ORIGIN
         value: https://flamingo-client.onrender.com,https://flamingo-admin.onrender.com
       - key: S3_ENDPOINT
-        sync: false
+        value: CHANGE_ME
       - key: S3_ACCESS_KEY
-        sync: false
+        value: CHANGE_ME
       - key: S3_SECRET_KEY
-        sync: false
+        value: CHANGE_ME
       - key: S3_BUCKET
         value: flamingo
       - key: S3_PUBLIC_URL
-        sync: false
+        value: CHANGE_ME
       - key: NODE_ENV
         value: production
       - key: REQUEST_TIMEOUT_MS
@@ -40,7 +40,7 @@ services:
       - key: NODE_VERSION
         value: "20.19.0"
       - key: BREVO_API_KEY
-        sync: false
+        value: CHANGE_ME
       - key: BREVO_SENDER_EMAIL
         value: noreply@flamingo-cocobeach.com
       - key: ADMIN_URL
