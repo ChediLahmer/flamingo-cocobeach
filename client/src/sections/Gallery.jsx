@@ -1,5 +1,6 @@
 import { motion, useInView } from "framer-motion";
 import { useRef, useState, useEffect } from "react";
+import { API_BASE } from "../lib/api";
 
 export default function Gallery() {
   const ref = useRef(null);
@@ -10,10 +11,10 @@ export default function Gallery() {
   const [lightbox, setLightbox] = useState(null);
 
   useEffect(() => {
-    fetch("/api/gallery/categories")
+    fetch(`${API_BASE}/gallery/categories`)
       .then((r) => r.json())
       .then(setCategories);
-    fetch("/api/gallery?limit=50")
+    fetch(`${API_BASE}/gallery?limit=50`)
       .then((r) => r.json())
       .then((d) => setImages(d.items || []));
   }, []);
@@ -22,7 +23,7 @@ export default function Gallery() {
     const params = activeFilter
       ? `?categoryId=${activeFilter}&limit=50`
       : "?limit=50";
-    fetch(`/api/gallery${params}`)
+    fetch(`${API_BASE}/gallery${params}`)
       .then((r) => r.json())
       .then((d) => setImages(d.items || []));
   }, [activeFilter]);

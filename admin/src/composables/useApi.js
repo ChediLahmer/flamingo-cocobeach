@@ -1,6 +1,6 @@
 import { useAuth } from "./useAuth";
 
-const BASE = "/api";
+const BASE = import.meta.env.VITE_API_URL || "/api";
 
 export function useApi() {
   const { token } = useAuth();
@@ -14,6 +14,11 @@ export function useApi() {
     }
     const res = await fetch(`${BASE}${path}`, { ...options, headers });
     if (res.status === 204) return null;
+    if (res.status === 401) {
+      localStorage.removeItem("token");
+      window.location.href = "/login";
+      throw new Error("Session expired");
+    }
     if (!res.ok) {
       const err = await res.json().catch(() => ({ error: res.statusText }));
       throw new Error(err.message || err.error || "Request failed");

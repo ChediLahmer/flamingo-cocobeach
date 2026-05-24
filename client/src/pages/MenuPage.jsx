@@ -3,6 +3,7 @@ import { useSearchParams, Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import { useLanguage } from "../i18n/LanguageContext";
 import { MenuPageSkeleton } from "../components/Skeleton";
+import { API_BASE } from "../lib/api";
 
 const ITEMS_PER_PAGE = 12;
 
@@ -19,7 +20,7 @@ export default function MenuPage() {
   const { t, localizedValue } = useLanguage();
 
   useEffect(() => {
-    fetch("/api/menu/categories")
+    fetch(`${API_BASE}/menu/categories`)
       .then((r) => {
         if (!r.ok) throw new Error(r.status);
         return r.json();
@@ -47,7 +48,7 @@ export default function MenuPage() {
         page: p,
         limit: ITEMS_PER_PAGE,
       });
-      const res = await fetch(`/api/menu/items?${params}`);
+      const res = await fetch(`${API_BASE}/menu/items?${params}`);
       if (!res.ok) throw new Error(res.status);
       const data = await res.json();
       setItems(data.items || []);

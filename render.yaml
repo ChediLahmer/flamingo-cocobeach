@@ -16,21 +16,21 @@ services:
     startCommand: npm start
     envVars:
       - key: DATABASE_URL
-        value: CHANGE_ME
+        sync: false
       - key: JWT_SECRET
         generateValue: true
       - key: CORS_ORIGIN
-        value: CHANGE_ME
+        sync: false
       - key: S3_ENDPOINT
-        value: CHANGE_ME
+        sync: false
       - key: S3_ACCESS_KEY
-        value: CHANGE_ME
+        sync: false
       - key: S3_SECRET_KEY
-        value: CHANGE_ME
+        sync: false
       - key: S3_BUCKET
         value: flamingo
       - key: S3_PUBLIC_URL
-        value: CHANGE_ME
+        sync: false
       - key: NODE_ENV
         value: production
       - key: REQUEST_TIMEOUT_MS
@@ -40,11 +40,11 @@ services:
       - key: NODE_VERSION
         value: "20.19.0"
       - key: BREVO_API_KEY
-        value: CHANGE_ME
+        sync: false
       - key: BREVO_SENDER_EMAIL
         value: noreply@flamingo-cocobeach.com
       - key: ADMIN_URL
-        value: CHANGE_ME
+        sync: false
 
   # ─── Client (public website) ────────────────────────────
   - type: web
@@ -62,14 +62,13 @@ services:
         value: public, max-age=31536000, immutable
     routes:
       - type: rewrite
-        source: /api/*
-        destination: https://flamingo-api-5o24.onrender.com/api/*
-      - type: rewrite
         source: /*
         destination: /index.html
     envVars:
       - key: NODE_VERSION
         value: "20.19.0"
+      - key: VITE_API_URL
+        sync: false
 
   # ─── Admin panel ────────────────────────────────────────
   - type: web
@@ -87,11 +86,10 @@ services:
         value: public, max-age=31536000, immutable
     routes:
       - type: rewrite
-        source: /api/*
-        destination: https://flamingo-api-5o24.onrender.com/api/*
-      - type: rewrite
         source: /*
         destination: /index.html
     envVars:
       - key: NODE_VERSION
         value: "20.19.0"
+      - key: VITE_API_URL
+        sync: false

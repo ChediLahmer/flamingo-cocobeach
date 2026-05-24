@@ -3,6 +3,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { LanguageProvider, useLanguage } from "./i18n/LanguageContext";
 import { ToastProvider } from "./components/ToastContext";
 import ErrorBoundary from "./components/ErrorBoundary";
+import { API_BASE } from "./lib/api";
 import Navbar from "./components/Navbar";
 import Footer from "./components/Footer";
 import Loader from "./components/Loader";
@@ -48,7 +49,7 @@ export default function App() {
   const [configError, setConfigError] = useState(false);
 
   useEffect(() => {
-    fetch("/api/config")
+    fetch(`${API_BASE}/config`)
       .then((r) => {
         if (!r.ok) throw new Error(r.status);
         return r.json();

@@ -3,6 +3,7 @@ import { useRef, useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { useLanguage } from "../i18n/LanguageContext";
 import { GalleryTeaserSkeleton } from "../components/Skeleton";
+import { API_BASE } from "../lib/api";
 
 const MAX_PREVIEW = 8;
 
@@ -15,7 +16,7 @@ export default function GalleryTeaser() {
   const { t } = useLanguage();
 
   useEffect(() => {
-    fetch(`/api/gallery?limit=${MAX_PREVIEW}`)
+    fetch(`${API_BASE}/gallery?limit=${MAX_PREVIEW}`)
       .then((r) => {
         if (!r.ok) throw new Error(r.status);
         return r.json();

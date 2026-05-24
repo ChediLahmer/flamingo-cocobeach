@@ -3,6 +3,7 @@ import { useRef, useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { useLanguage } from "../i18n/LanguageContext";
 import { SpacesTeaserSkeleton } from "../components/Skeleton";
+import { API_BASE } from "../lib/api";
 
 const MAX_PREVIEW = 3;
 
@@ -15,7 +16,7 @@ export default function SpacesTeaser() {
   const { t, localizedValue } = useLanguage();
 
   useEffect(() => {
-    fetch(`/api/spaces?limit=${MAX_PREVIEW}`)
+    fetch(`${API_BASE}/spaces?limit=${MAX_PREVIEW}`)
       .then((r) => {
         if (!r.ok) throw new Error(r.status);
         return r.json();

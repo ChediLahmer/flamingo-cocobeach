@@ -1,6 +1,7 @@
 import { motion, useInView } from "framer-motion";
 import { useRef, useState, useEffect } from "react";
 import { useLanguage } from "../i18n/LanguageContext";
+import { API_BASE } from "../lib/api";
 
 export default function Spaces() {
   const ref = useRef(null);
@@ -9,7 +10,7 @@ export default function Spaces() {
   const { t, localizedValue } = useLanguage();
 
   useEffect(() => {
-    fetch("/api/spaces")
+    fetch(`${API_BASE}/spaces`)
       .then((r) => r.json())
       .then((data) => setSpaces(data.items || []))
       .catch(() => {});

@@ -1,6 +1,7 @@
 import { motion, useInView } from "framer-motion";
 import { useRef, useState, useEffect } from "react";
 import { useLanguage } from "../i18n/LanguageContext";
+import { API_BASE } from "../lib/api";
 
 export default function Menu() {
   const ref = useRef(null);
@@ -10,7 +11,7 @@ export default function Menu() {
   const { t, localizedValue } = useLanguage();
 
   useEffect(() => {
-    fetch("/api/menu/categories")
+    fetch(`${API_BASE}/menu/categories`)
       .then((r) => {
         if (!r.ok) throw new Error(r.status);
         return r.json();

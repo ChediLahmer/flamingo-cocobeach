@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import { useLanguage } from "../i18n/LanguageContext";
 import { GalleryPageSkeleton } from "../components/Skeleton";
+import { API_BASE } from "../lib/api";
 
 const BATCH_SIZE = 20;
 
@@ -25,7 +26,7 @@ export default function GalleryPage() {
         if (activeFilter) params.set("categoryId", activeFilter);
         if (!reset && cursor) params.set("cursor", cursor);
 
-        const res = await fetch(`/api/gallery?${params}`);
+        const res = await fetch(`${API_BASE}/gallery?${params}`);
         if (!res.ok) throw new Error(res.status);
         const data = await res.json();
         const newItems = data.items || [];
@@ -47,7 +48,7 @@ export default function GalleryPage() {
   );
 
   useEffect(() => {
-    fetch("/api/gallery/categories")
+    fetch(`${API_BASE}/gallery/categories`)
       .then((r) => {
         if (!r.ok) throw new Error(r.status);
         return r.json();
@@ -62,7 +63,7 @@ export default function GalleryPage() {
     setHasMore(true);
     const params = new URLSearchParams({ limit: BATCH_SIZE });
     if (activeFilter) params.set("categoryId", activeFilter);
-    fetch(`/api/gallery?${params}`)
+    fetch(`${API_BASE}/gallery?${params}`)
       .then((r) => {
         if (!r.ok) throw new Error(r.status);
         return r.json();

@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import { useLanguage } from "../i18n/LanguageContext";
 import { SpacesPageSkeleton } from "../components/Skeleton";
+import { API_BASE } from "../lib/api";
 
 const ITEMS_PER_PAGE = 6;
 
@@ -18,7 +19,9 @@ export default function SpacesPage() {
     setLoading(true);
     setError(false);
     try {
-      const res = await fetch(`/api/spaces?page=${p}&limit=${ITEMS_PER_PAGE}`);
+      const res = await fetch(
+        `${API_BASE}/spaces?page=${p}&limit=${ITEMS_PER_PAGE}`,
+      );
       if (!res.ok) throw new Error(res.status);
       const data = await res.json();
       setSpaces(data.items || []);

@@ -32,10 +32,12 @@ const router = createRouter({
   routes,
 });
 
+import { useAuth } from "./composables/useAuth";
+
 router.beforeEach((to) => {
   if (to.meta.requiresAuth || to.matched.some((r) => r.meta.requiresAuth)) {
-    const token = localStorage.getItem("token");
-    if (!token) return "/login";
+    const { isAuthenticated } = useAuth();
+    if (!isAuthenticated()) return "/login";
   }
 });
 
