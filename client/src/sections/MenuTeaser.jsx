@@ -1,5 +1,5 @@
-import { motion, useInView } from "framer-motion";
-import { useRef, useState, useEffect } from "react";
+import { motion } from "framer-motion";
+import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { useLanguage } from "../i18n/LanguageContext";
 import { MenuTeaserSkeleton } from "../components/Skeleton";
@@ -7,9 +7,9 @@ import { API_BASE } from "../lib/api";
 
 const MAX_PREVIEW = 4;
 
+const VP = { once: true, margin: "-50px" };
+
 export default function MenuTeaser() {
-  const ref = useRef(null);
-  const isInView = useInView(ref, { once: true, margin: "-100px" });
   const [categories, setCategories] = useState([]);
   const [activeTab, setActiveTab] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -44,12 +44,13 @@ export default function MenuTeaser() {
   const previewItems = (activeCategory?.items || []).slice(0, MAX_PREVIEW);
 
   return (
-    <section id="menu" className="py-32 relative" ref={ref}>
+    <section id="menu" className="py-32 relative">
       <div className="max-w-7xl mx-auto px-6">
         <motion.div
           className="text-center mb-16"
           initial={{ opacity: 0, y: 40 }}
-          animate={isInView ? { opacity: 1, y: 0 } : {}}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={VP}
           transition={{ duration: 0.7 }}
         >
           <span className="text-flamingo font-semibold text-sm uppercase tracking-widest">
@@ -64,7 +65,8 @@ export default function MenuTeaser() {
         <motion.div
           className="flex flex-wrap justify-center gap-3 mb-12"
           initial={{ opacity: 0, y: 20 }}
-          animate={isInView ? { opacity: 1, y: 0 } : {}}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={VP}
           transition={{ delay: 0.2, duration: 0.6 }}
         >
           {categories.map((cat) => (
@@ -86,7 +88,8 @@ export default function MenuTeaser() {
         <motion.div
           className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-4xl mx-auto"
           initial={{ opacity: 0 }}
-          animate={isInView ? { opacity: 1 } : {}}
+          whileInView={{ opacity: 1 }}
+          viewport={VP}
           transition={{ delay: 0.4, duration: 0.6 }}
         >
           {previewItems.map((item, i) => (
@@ -132,7 +135,8 @@ export default function MenuTeaser() {
         <motion.div
           className="text-center mt-12"
           initial={{ opacity: 0 }}
-          animate={isInView ? { opacity: 1 } : {}}
+          whileInView={{ opacity: 1 }}
+          viewport={VP}
           transition={{ delay: 0.6 }}
         >
           <Link

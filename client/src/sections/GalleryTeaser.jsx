@@ -1,5 +1,5 @@
-import { motion, useInView } from "framer-motion";
-import { useRef, useState, useEffect } from "react";
+import { motion } from "framer-motion";
+import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { useLanguage } from "../i18n/LanguageContext";
 import { GalleryTeaserSkeleton } from "../components/Skeleton";
@@ -7,9 +7,9 @@ import { API_BASE } from "../lib/api";
 
 const MAX_PREVIEW = 8;
 
+const VP = { once: true, margin: "-50px" };
+
 export default function GalleryTeaser() {
-  const ref = useRef(null);
-  const isInView = useInView(ref, { once: true, margin: "-100px" });
   const [images, setImages] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
@@ -37,12 +37,13 @@ export default function GalleryTeaser() {
   if (error || images.length === 0) return null;
 
   return (
-    <section id="gallery" className="py-32 relative" ref={ref}>
+    <section id="gallery" className="py-32 relative">
       <div className="max-w-7xl mx-auto px-6">
         <motion.div
           className="text-center mb-16"
           initial={{ opacity: 0, y: 40 }}
-          animate={isInView ? { opacity: 1, y: 0 } : {}}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={VP}
           transition={{ duration: 0.7 }}
         >
           <span className="text-tropical-orange font-semibold text-sm uppercase tracking-widest">
@@ -60,7 +61,8 @@ export default function GalleryTeaser() {
               key={img.id}
               className="break-inside-avoid group"
               initial={{ opacity: 0, scale: 0.9 }}
-              animate={isInView ? { opacity: 1, scale: 1 } : {}}
+              whileInView={{ opacity: 1, scale: 1 }}
+              viewport={VP}
               transition={{ delay: i * 0.05, duration: 0.4 }}
             >
               <div className="relative rounded-2xl overflow-hidden">
@@ -80,7 +82,8 @@ export default function GalleryTeaser() {
         <motion.div
           className="text-center mt-12"
           initial={{ opacity: 0 }}
-          animate={isInView ? { opacity: 1 } : {}}
+          whileInView={{ opacity: 1 }}
+          viewport={VP}
           transition={{ delay: 0.6 }}
         >
           <Link
