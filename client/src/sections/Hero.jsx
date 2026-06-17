@@ -1,6 +1,8 @@
 import { motion } from "framer-motion";
 import { useMemo } from "react";
 import { useLanguage } from "../i18n/LanguageContext";
+import { useTimeTheme } from "../theme/useTimeTheme";
+import TropicalBackground from "../components/TropicalBackground";
 
 function getGreetingKey() {
   const hour = new Date().getHours();
@@ -10,8 +12,16 @@ function getGreetingKey() {
   return "hero.greeting_night";
 }
 
+const HERO_GRADIENT = {
+  morning: "from-sky-400 via-tropical-teal to-tropical-yellow",
+  afternoon: "from-flamingo-dark via-tropical-orange to-tropical-yellow",
+  evening: "from-flamingo-dark via-tropical-orange to-amber-300",
+  night: "from-slate-950 via-indigo-950 to-slate-800",
+};
+
 export default function Hero({ config }) {
   const { t, localizedValue } = useLanguage();
+  const { period, isNight } = useTimeTheme();
   const greeting = useMemo(() => t(getGreetingKey()), [t]);
   return (
     <section
@@ -31,20 +41,33 @@ export default function Hero({ config }) {
           <source src={config.hero_video_url} type="video/mp4" />
         </video>
       ) : (
-        <div className="absolute inset-0 bg-gradient-to-br from-flamingo-dark via-tropical-orange to-tropical-yellow" />
+        <div
+          className={`absolute inset-0 bg-gradient-to-br ${HERO_GRADIENT[period] || HERO_GRADIENT.afternoon}`}
+        />
       )}
 
-      {/* Overlay */}
-      <div className="absolute inset-0 bg-black/50" />
+      {/* Overlay — deeper & cooler at night so the hero matches the theme */}
+      <div
+        className={`absolute inset-0 ${
+          isNight
+            ? "bg-gradient-to-b from-slate-950/70 via-indigo-950/55 to-slate-900/70"
+            : "bg-black/50"
+        }`}
+      />
+
+      {/* Tropical foliage */}
+      <TropicalBackground variant="hero" />
 
       {/* Animated blobs */}
-      <div className="absolute top-20 left-10 w-72 h-72 bg-flamingo/20 rounded-full blur-3xl animate-blob" />
       <div
-        className="absolute bottom-20 right-10 w-96 h-96 bg-tropical-orange/20 rounded-full blur-3xl animate-blob"
+        className={`absolute top-20 left-10 w-72 h-72 rounded-full blur-3xl animate-blob ${isNight ? "bg-indigo-400/15" : "bg-flamingo/20"}`}
+      />
+      <div
+        className={`absolute bottom-20 right-10 w-96 h-96 rounded-full blur-3xl animate-blob ${isNight ? "bg-sky-500/15" : "bg-tropical-orange/20"}`}
         style={{ animationDelay: "2s" }}
       />
       <div
-        className="absolute top-1/2 left-1/2 w-64 h-64 bg-tropical-teal/10 rounded-full blur-3xl animate-blob"
+        className={`absolute top-1/2 left-1/2 w-64 h-64 rounded-full blur-3xl animate-blob ${isNight ? "bg-violet-500/10" : "bg-tropical-teal/10"}`}
         style={{ animationDelay: "4s" }}
       />
 

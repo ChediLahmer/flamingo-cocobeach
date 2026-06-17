@@ -2,6 +2,7 @@ import { useEffect, useState, useCallback } from "react";
 import { useSearchParams, Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import { useLanguage } from "../i18n/LanguageContext";
+import { useUserAuth } from "../auth/UserAuthContext";
 import { MenuPageSkeleton } from "../components/Skeleton";
 import { API_BASE } from "../lib/api";
 
@@ -18,6 +19,7 @@ export default function MenuPage() {
   const [itemsLoading, setItemsLoading] = useState(false);
   const [error, setError] = useState(false);
   const { t, localizedValue } = useLanguage();
+  const { isFavorite, toggleFavorite } = useUserAuth();
 
   useEffect(() => {
     fetch(`${API_BASE}/menu/categories`)
@@ -83,8 +85,8 @@ export default function MenuPage() {
   );
 
   return (
-    <div className="min-h-screen pt-24 pb-20">
-      <div className="max-w-7xl mx-auto px-6">
+    <div className="relative min-h-screen overflow-hidden pt-24 pb-20">
+      <div className="relative z-10 max-w-7xl mx-auto px-6">
         {/* Header */}
         <div className="text-center mb-12">
           <Link
@@ -177,13 +179,42 @@ export default function MenuPage() {
                     <h3 className="font-semibold text-gray-800 group-hover:text-flamingo transition-colors">
                       {localizedValue(item.name)}
                     </h3>
-                    <span
-                      className="text-flamingo font-bold whitespace-nowrap"
-                      dir="ltr"
-                    >
-                      {Number(item.priceStandard).toFixed(0)}{" "}
-                      {t("common.currency")}
-                    </span>
+                    <div className="flex shrink-0 items-center gap-2">
+                      <span
+                        className="text-flamingo font-bold whitespace-nowrap"
+                        dir="ltr"
+                      >
+                        {Number(item.priceStandard).toFixed(0)}{" "}
+                        {t("common.currency")}
+                      </span>
+                      <button
+                        onClick={() =>
+                          toggleFavorite({
+                            id: item.id,
+                            name: item.name,
+                            image: item.image,
+                            priceStandard: item.priceStandard,
+                          })
+                        }
+                        className={`transition-transform hover:scale-110 ${
+                          isFavorite(item.id)
+                            ? "text-flamingo"
+                            : "text-gray-300 hover:text-flamingo"
+                        }`}
+                        aria-label={t("menu.save")}
+                        title={t("menu.save")}
+                      >
+                        <svg
+                          className="h-5 w-5"
+                          viewBox="0 0 24 24"
+                          fill={isFavorite(item.id) ? "currentColor" : "none"}
+                          stroke="currentColor"
+                          strokeWidth="2"
+                        >
+                          <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
+                        </svg>
+                      </button>
+                    </div>
                   </div>
                   {localizedValue(item.description) && (
                     <p className="text-gray-500 text-sm mt-1 line-clamp-2">

@@ -1,22 +1,39 @@
 import { useEffect, useState, lazy, Suspense } from "react";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
 import { LanguageProvider, useLanguage } from "./i18n/LanguageContext";
 import { ToastProvider } from "./components/ToastContext";
+import { UserAuthProvider } from "./auth/UserAuthContext";
 import ErrorBoundary from "./components/ErrorBoundary";
 import { API_BASE } from "./lib/api";
 import Navbar from "./components/Navbar";
 import Footer from "./components/Footer";
 import Loader from "./components/Loader";
+import AuthModal from "./components/AuthModal";
+import Seo from "./components/Seo";
+import { GlobalBackground } from "./components/TropicalBackground";
+import { useTimeTheme } from "./theme/useTimeTheme";
 
 const HomePage = lazy(() => import("./pages/HomePage"));
 const MenuPage = lazy(() => import("./pages/MenuPage"));
 const SpacesPage = lazy(() => import("./pages/SpacesPage"));
 const GalleryPage = lazy(() => import("./pages/GalleryPage"));
+const AccountPage = lazy(() => import("./pages/AccountPage"));
+const ResetPasswordPage = lazy(() => import("./pages/ResetPasswordPage"));
 const NotFoundPage = lazy(() => import("./pages/NotFoundPage"));
 
 function PageShell({ children, config }) {
+  const { t } = useLanguage();
+  const { pathname } = useLocation();
+  const titleMap = {
+    "/carte": t("menu.title"),
+    "/espaces": t("spaces.title"),
+    "/galerie": t("gallery.title"),
+    "/compte": t("account.title"),
+  };
   return (
     <div className="grain">
+      <GlobalBackground />
+      <Seo config={config} title={titleMap[pathname]} path={pathname} />
       <Navbar config={config} />
       {children}
       <Footer config={config} />
@@ -65,7 +82,10 @@ export default function App() {
     <ErrorBoundary>
       <LanguageProvider>
         <ToastProvider>
-          <AppContent config={config} configError={configError} />
+          <UserAuthProvider>
+            <AppContent config={config} configError={configError} />
+            <AuthModal />
+          </UserAuthProvider>
         </ToastProvider>
       </LanguageProvider>
     </ErrorBoundary>
@@ -74,11 +94,16 @@ export default function App() {
 
 function AppContent({ config, configError }) {
   const { dir, lang } = useLanguage();
+  const { period } = useTimeTheme();
 
   useEffect(() => {
     document.documentElement.dir = dir;
     document.documentElement.lang = lang;
   }, [dir, lang]);
+
+  useEffect(() => {
+    document.documentElement.dataset.period = period;
+  }, [period]);
 
   if (configError) {
     return (
@@ -135,6 +160,22 @@ function AppContent({ config, configError }) {
             element={
               <PageShell config={config}>
                 <GalleryPage />
+              </PageShell>
+            }
+          />
+          <Route
+            path="/compte"
+            element={
+              <PageShell config={config}>
+                <AccountPage />
+              </PageShell>
+            }
+          />
+          <Route
+            path="/reset-password"
+            element={
+              <PageShell config={config}>
+                <ResetPasswordPage />
               </PageShell>
             }
           />

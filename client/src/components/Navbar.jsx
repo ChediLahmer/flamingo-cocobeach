@@ -2,6 +2,8 @@ import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Link, useLocation } from "react-router-dom";
 import { useLanguage } from "../i18n/LanguageContext";
+import { useUserAuth } from "../auth/UserAuthContext";
+import { useTimeTheme } from "../theme/useTimeTheme";
 
 function getNavLinks(t) {
   return [
@@ -45,18 +47,42 @@ function WhatsAppIcon({ className }) {
   );
 }
 
+function UserIcon({ className }) {
+  return (
+    <svg
+      className={className}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+    >
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.5 20.25a7.5 7.5 0 0115 0"
+      />
+    </svg>
+  );
+}
+
 export default function Navbar({ config }) {
   const [scrolled, setScrolled] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const location = useLocation();
   const isHome = location.pathname === "/";
   const { t, localizedValue, lang, switchLang } = useLanguage();
+  const { isAuthenticated, user, openAuth } = useUserAuth();
+  const { isNight } = useTimeTheme();
   const navLinks = getNavLinks(t);
 
   // On sub-pages, text is always dark (readable), but bg evolves on scroll
   const solid = !isHome || scrolled;
   // scrolled gives a "settled" feel — more compact, deeper bg
   const settled = scrolled;
+  // At night the solid bar is a dark glass, so its text/icons go light too.
+  const lightText = !solid || isNight;
+  const linkText = lightText ? "text-white/75" : "text-gray-700";
+  const iconText = lightText ? "text-white/80" : "text-gray-500";
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 50);
@@ -70,7 +96,7 @@ export default function Navbar({ config }) {
       return (
         <a
           href={link.anchor}
-          className={`hover:text-flamingo transition-colors text-sm uppercase tracking-widest font-medium ${solid ? "text-gray-700" : "text-white/70"}`}
+          className={`hover:text-flamingo transition-colors text-sm uppercase tracking-widest font-medium ${linkText}`}
         >
           {link.label}
         </a>
@@ -79,7 +105,7 @@ export default function Navbar({ config }) {
     return (
       <Link
         to={link.href === "/" ? `/${link.anchor}` : link.href}
-        className={`hover:text-flamingo transition-colors text-sm uppercase tracking-widest font-medium ${solid ? "text-gray-700" : "text-white/70"}`}
+        className={`hover:text-flamingo transition-colors text-sm uppercase tracking-widest font-medium ${linkText}`}
       >
         {link.label}
       </Link>
@@ -92,8 +118,12 @@ export default function Navbar({ config }) {
         className={`fixed top-0 left-0 right-0 z-50 transition-all duration-700 ${
           solid
             ? settled
-              ? "bg-sand/95 backdrop-blur-xl py-2 shadow-lg border-b border-flamingo/10"
-              : "bg-sand/70 backdrop-blur-md py-4 shadow-sm border-b border-flamingo/5"
+              ? isNight
+                ? "bg-slate-900/85 backdrop-blur-xl py-2 shadow-lg shadow-black/30 border-b border-white/10"
+                : "bg-sand/95 backdrop-blur-xl py-2 shadow-lg border-b border-flamingo/10"
+              : isNight
+                ? "bg-slate-900/70 backdrop-blur-md py-4 shadow-sm border-b border-white/5"
+                : "bg-sand/70 backdrop-blur-md py-4 shadow-sm border-b border-flamingo/5"
             : "bg-transparent py-5"
         }`}
         initial={{ y: -100 }}
@@ -109,7 +139,7 @@ export default function Navbar({ config }) {
                   href={`https://wa.me/${config.whatsapp}`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className={`transition-all hover:text-green-500 hover:scale-110 ${solid ? "text-gray-500" : "text-white/80"}`}
+                  className={`transition-all hover:text-green-500 hover:scale-110 ${iconText}`}
                 >
                   <WhatsAppIcon className="w-5 h-5" />
                 </a>
@@ -119,7 +149,7 @@ export default function Navbar({ config }) {
                   href={config.tiktok}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className={`transition-all hover:text-flamingo hover:scale-110 ${solid ? "text-gray-500" : "text-white/80"}`}
+                  className={`transition-all hover:text-flamingo hover:scale-110 ${iconText}`}
                 >
                   <TikTokIcon className="w-5 h-5" />
                 </a>
@@ -129,7 +159,7 @@ export default function Navbar({ config }) {
                   href={config.facebook}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className={`transition-all hover:text-flamingo hover:scale-110 ${solid ? "text-gray-500" : "text-white/80"}`}
+                  className={`transition-all hover:text-flamingo hover:scale-110 ${iconText}`}
                 >
                   <FacebookIcon className="w-5 h-5" />
                 </a>
@@ -139,7 +169,7 @@ export default function Navbar({ config }) {
                   href={config.instagram}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className={`transition-all hover:text-flamingo hover:scale-110 ${solid ? "text-gray-500" : "text-white/80"}`}
+                  className={`transition-all hover:text-flamingo hover:scale-110 ${iconText}`}
                 >
                   <InstagramIcon className="w-5 h-5" />
                 </a>
@@ -148,14 +178,14 @@ export default function Navbar({ config }) {
             <Link to="/" className="flex items-center gap-2 min-w-0">
               <div className="min-w-0">
                 <span
-                  className={`font-display text-xl sm:text-2xl tracking-wider transition-colors block leading-tight ${solid ? "text-flamingo-dark" : "text-white"}`}
+                  className={`font-display text-xl sm:text-2xl tracking-wider transition-colors block leading-tight ${solid ? (isNight ? "text-white" : "text-flamingo-dark") : "text-white"}`}
                 >
                   {localizedValue(config.name) || "FLAMINGO"}
                 </span>
                 {config.phone && (
                   <span
                     dir="ltr"
-                    className={`text-[0.65rem] sm:text-xs transition-colors block ${solid ? "text-gray-400" : "text-white/50"}`}
+                    className={`text-[0.65rem] sm:text-xs transition-colors block ${lightText ? "text-white/50" : "text-gray-400"}`}
                   >
                     {config.phone}
                   </span>
@@ -180,9 +210,9 @@ export default function Navbar({ config }) {
                 className={`px-2 py-1 text-xs uppercase font-semibold rounded transition-all ${
                   lang === l
                     ? "bg-flamingo text-white"
-                    : solid
-                      ? "text-gray-500 hover:text-flamingo"
-                      : "text-white/60 hover:text-white"
+                    : lightText
+                      ? "text-white/60 hover:text-white"
+                      : "text-gray-500 hover:text-flamingo"
                 }`}
               >
                 {l}
@@ -190,10 +220,37 @@ export default function Navbar({ config }) {
             ))}
           </div>
 
+          {/* Account */}
+          <div className="hidden sm:flex items-center ms-2">
+            {isAuthenticated ? (
+              <Link
+                to="/compte"
+                title={user?.name || user?.email}
+                className="flex items-center gap-2"
+              >
+                <span className="grid h-8 w-8 place-items-center rounded-full bg-flamingo text-sm font-bold text-white shadow-sm">
+                  {(user?.name || user?.email || "U").slice(0, 1).toUpperCase()}
+                </span>
+              </Link>
+            ) : (
+              <button
+                onClick={() => openAuth("register")}
+                className={`flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-semibold uppercase tracking-wide transition-all ${
+                  solid
+                    ? "bg-flamingo text-white hover:bg-flamingo-dark"
+                    : "bg-white/15 text-white backdrop-blur hover:bg-white/25"
+                }`}
+              >
+                <UserIcon className="h-4 w-4" />
+                {t("nav.account")}
+              </button>
+            )}
+          </div>
+
           {/* Mobile toggle */}
           <button
             onClick={() => setMenuOpen(!menuOpen)}
-            className={`lg:hidden text-2xl ${solid ? "text-gray-800" : "text-white"}`}
+            className={`lg:hidden text-2xl ${lightText ? "text-white" : "text-gray-800"}`}
           >
             {menuOpen ? "✕" : "☰"}
           </button>
@@ -232,6 +289,43 @@ export default function Navbar({ config }) {
                 </Link>
               </motion.div>
             ))}
+
+            {/* Mobile account */}
+            <motion.div
+              initial={{ opacity: 0, y: 30 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: navLinks.length * 0.1 }}
+              className="mt-2"
+            >
+              {isAuthenticated ? (
+                <Link
+                  to="/compte"
+                  onClick={() => setMenuOpen(false)}
+                  className="flex items-center gap-3 rounded-full bg-white/10 px-6 py-3 text-white"
+                >
+                  <span className="grid h-8 w-8 place-items-center rounded-full bg-flamingo text-sm font-bold">
+                    {(user?.name || user?.email || "U")
+                      .slice(0, 1)
+                      .toUpperCase()}
+                  </span>
+                  <span className="font-display text-2xl tracking-wide">
+                    {t("nav.account")}
+                  </span>
+                </Link>
+              ) : (
+                <button
+                  onClick={() => {
+                    setMenuOpen(false);
+                    openAuth("register");
+                  }}
+                  className="flex items-center gap-2 rounded-full bg-flamingo px-7 py-3 font-semibold text-white shadow-lg shadow-flamingo/30"
+                >
+                  <UserIcon className="h-5 w-5" />
+                  {t("nav.account")}
+                </button>
+              )}
+            </motion.div>
+
             {/* Mobile social icons */}
             <div className="flex gap-5 mt-8 pt-6 border-t border-white/20">
               {config.instagram && (

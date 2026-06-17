@@ -93,8 +93,8 @@ export default function GalleryPage() {
   }, [hasMore, loading, loadImages]);
 
   return (
-    <div className="min-h-screen pt-24 pb-20">
-      <div className="max-w-7xl mx-auto px-6">
+    <div className="relative min-h-screen overflow-hidden pt-24 pb-20">
+      <div className="relative z-10 max-w-7xl mx-auto px-6">
         {/* Header */}
         <div className="text-center mb-12">
           <Link

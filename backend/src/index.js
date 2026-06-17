@@ -13,6 +13,9 @@ import { configRoutes } from "./routes/config.js";
 import { uploadRoutes } from "./routes/upload.js";
 import { mediaRoutes } from "./routes/media.js";
 import { passwordResetRoutes } from "./routes/password-reset.js";
+import { userRoutes } from "./routes/users.js";
+import { flashSaleRoutes } from "./routes/flash-sales.js";
+import { testimonialRoutes } from "./routes/testimonials.js";
 
 if (process.env.NODE_ENV === "production") {
   const required = [
@@ -96,6 +99,9 @@ await app.register(galleryRoutes, { prefix: "/api/gallery" });
 await app.register(configRoutes, { prefix: "/api/config" });
 await app.register(uploadRoutes, { prefix: "/api/upload" });
 await app.register(mediaRoutes, { prefix: "/api/media" });
+await app.register(userRoutes, { prefix: "/api/users" });
+await app.register(flashSaleRoutes, { prefix: "/api/flash-sales" });
+await app.register(testimonialRoutes, { prefix: "/api/testimonials" });
 
 const port = process.env.PORT || 3000;
 

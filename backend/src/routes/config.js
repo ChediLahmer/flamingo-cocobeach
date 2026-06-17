@@ -16,14 +16,27 @@ const MEDIA_KEYS = new Set([
   "about_image_1",
   "about_image_2",
   "logo_url",
+  "og_image",
 ]);
 
-const MULTILINGUAL_KEYS = new Set([
+const REQUIRED_MULTILINGUAL_KEYS = new Set([
   "name",
   "tagline",
   "description",
   "address",
   "hours",
+]);
+
+const OPTIONAL_MULTILINGUAL_KEYS = new Set([
+  "seo_title",
+  "seo_description",
+  "popup_title",
+  "popup_text",
+]);
+
+const MULTILINGUAL_KEYS = new Set([
+  ...REQUIRED_MULTILINGUAL_KEYS,
+  ...OPTIONAL_MULTILINGUAL_KEYS,
 ]);
 
 const ALLOWED_CONFIG_KEYS = new Set([
@@ -47,6 +60,13 @@ const ALLOWED_CONFIG_KEYS = new Set([
   "logo_url",
   "tagline",
   "description",
+  "seo_title",
+  "seo_description",
+  "seo_keywords",
+  "og_image",
+  "popup_enabled",
+  "popup_title",
+  "popup_text",
 ]);
 
 function validateConfigValue(key, value) {
@@ -54,16 +74,22 @@ function validateConfigValue(key, value) {
     if (!value || typeof value !== "object") {
       throw new ValidationError(key, `${key} doit être un objet {fr, en, ar}`);
     }
+    const required = REQUIRED_MULTILINGUAL_KEYS.has(key);
     for (const lang of ["fr", "en", "ar"]) {
-      if (
-        !value[lang] ||
-        typeof value[lang] !== "string" ||
-        !value[lang].trim()
-      ) {
-        throw new ValidationError(key, `${key}.${lang} est requis`);
+      const v = value[lang];
+      if (required) {
+        if (!v || typeof v !== "string" || !v.trim()) {
+          throw new ValidationError(key, `${key}.${lang} est requis`);
+        }
+      } else if (v != null && typeof v !== "string") {
+        throw new ValidationError(key, `${key}.${lang} doit être une chaîne`);
       }
     }
-    return JSON.stringify(value);
+    return JSON.stringify({
+      fr: value.fr || "",
+      en: value.en || "",
+      ar: value.ar || "",
+    });
   }
   if (typeof value !== "string") {
     throw new ValidationError(key, `${key} doit être une chaîne`);

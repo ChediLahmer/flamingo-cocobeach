@@ -14,7 +14,7 @@ export default function About({ config }) {
       {/* Background accent */}
       <div className="absolute top-0 end-0 w-1/2 h-full bg-gradient-to-l from-flamingo/5 to-transparent" />
 
-      <div className="max-w-7xl mx-auto px-6">
+      <div className="relative z-10 max-w-7xl mx-auto px-6">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
           {/* Text */}
           <motion.div

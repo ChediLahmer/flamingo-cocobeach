@@ -106,6 +106,28 @@
                 rows="3"
               ></textarea>
             </template>
+            <template v-else-if="field.type === 'boolean'">
+              <button
+                type="button"
+                @click="
+                  config[field.key] =
+                    config[field.key] === 'true' ? 'false' : 'true'
+                "
+                class="relative inline-flex h-6 w-11 items-center rounded-full transition-colors"
+                :class="
+                  config[field.key] === 'true' ? 'bg-primary' : 'bg-border'
+                "
+              >
+                <span
+                  class="inline-block h-4 w-4 transform rounded-full bg-white transition-transform"
+                  :class="
+                    config[field.key] === 'true'
+                      ? 'translate-x-6'
+                      : 'translate-x-1'
+                  "
+                ></span>
+              </button>
+            </template>
             <template v-else>
               <input
                 v-model="config[field.key]"
@@ -137,8 +159,8 @@ import { useToast } from "../composables/useToast";
 
 const api = useApi();
 const toast = useToast();
-const config = ref({});
 const saving = ref(false);
+const loaded = ref(false);
 
 const MULTILINGUAL_KEYS = new Set([
   "name",
@@ -146,7 +168,21 @@ const MULTILINGUAL_KEYS = new Set([
   "description",
   "address",
   "hours",
+  "seo_title",
+  "seo_description",
+  "popup_title",
+  "popup_text",
 ]);
+
+// Pre-seed multilingual keys so the template never reads `undefined[lang]`
+// during the first (pre-fetch) render — that was crashing the whole page.
+function emptyConfig() {
+  const base = {};
+  for (const key of MULTILINGUAL_KEYS) base[key] = { fr: "", en: "", ar: "" };
+  return base;
+}
+
+const config = ref(emptyConfig());
 
 const configGroups = [
   {
@@ -196,17 +232,62 @@ const configGroups = [
       { key: "about_image_2", label: "Image About 2", type: "media" },
     ],
   },
+  {
+    title: "SEO & Référencement",
+    fields: [
+      {
+        key: "seo_title",
+        label: "Titre SEO (balise title)",
+        type: "multilingual",
+      },
+      {
+        key: "seo_description",
+        label: "Meta description",
+        type: "multilingual-textarea",
+      },
+      { key: "seo_keywords", label: "Mots-clés (séparés par des virgules)" },
+      {
+        key: "og_image",
+        label: "Image de partage (Open Graph)",
+        type: "media",
+      },
+    ],
+  },
+  {
+    title: "Popup d'accueil",
+    fields: [
+      { key: "popup_enabled", label: "Activer le popup", type: "boolean" },
+      { key: "popup_title", label: "Titre du popup", type: "multilingual" },
+      {
+        key: "popup_text",
+        label: "Texte du popup",
+        type: "multilingual-textarea",
+      },
+    ],
+  },
 ];
 
 onMounted(async () => {
-  const data = await api.get("/config");
-  // Ensure multilingual keys are objects
-  for (const key of MULTILINGUAL_KEYS) {
-    if (!data[key] || typeof data[key] !== "object") {
-      data[key] = { fr: data[key] || "", en: "", ar: "" };
+  try {
+    const data = await api.get("/config");
+    const merged = emptyConfig();
+    for (const [key, value] of Object.entries(data || {})) {
+      if (MULTILINGUAL_KEYS.has(key)) {
+        merged[key] =
+          value && typeof value === "object"
+            ? { fr: "", en: "", ar: "", ...value }
+            : { fr: value || "", en: "", ar: "" };
+      } else {
+        merged[key] = value;
+      }
     }
+    if (!merged.popup_enabled) merged.popup_enabled = "false";
+    config.value = merged;
+  } catch (e) {
+    toast.error(e.message || "Erreur lors du chargement de la configuration.");
+  } finally {
+    loaded.value = true;
   }
-  config.value = data;
 });
 
 async function uploadMedia(key, e) {
@@ -219,7 +300,14 @@ async function uploadMedia(key, e) {
 }
 
 async function save() {
-  for (const key of MULTILINGUAL_KEYS) {
+  const REQUIRED_MULTILINGUAL = [
+    "name",
+    "tagline",
+    "description",
+    "address",
+    "hours",
+  ];
+  for (const key of REQUIRED_MULTILINGUAL) {
     const val = config.value[key];
     if (!val || !val.fr?.trim() || !val.en?.trim() || !val.ar?.trim()) {
       toast.error(

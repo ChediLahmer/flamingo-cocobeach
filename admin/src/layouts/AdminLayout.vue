@@ -13,6 +13,8 @@ const navItems = [
   { to: "/menu", label: "Menu / Carte", icon: "menu" },
   { to: "/spaces", label: "Espaces", icon: "spaces" },
   { to: "/gallery", label: "Galerie", icon: "gallery" },
+  { to: "/flash-sales", label: "Ventes Flash", icon: "flash" },
+  { to: "/testimonials", label: "Témoignages", icon: "testimonials" },
   { to: "/config", label: "Configuration", icon: "config" },
 ];
 
@@ -120,6 +122,34 @@ function handleLogout() {
               stroke-linecap="round"
               stroke-linejoin="round"
               d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909M3.75 21h16.5a2.25 2.25 0 002.25-2.25V5.25a2.25 2.25 0 00-2.25-2.25H3.75a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 003.75 21z"
+            />
+          </svg>
+          <svg
+            v-else-if="item.icon === 'flash'"
+            class="h-[1.15rem] w-[1.15rem] shrink-0"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+            stroke-width="1.75"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              d="M3.75 13.5l10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75z"
+            />
+          </svg>
+          <svg
+            v-else-if="item.icon === 'testimonials'"
+            class="h-[1.15rem] w-[1.15rem] shrink-0"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+            stroke-width="1.75"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              d="M8.625 12a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H8.25m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H12m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0h-.375M21 12c0 4.556-4.03 8.25-9 8.25a9.764 9.764 0 01-2.555-.337A5.972 5.972 0 015.41 20.97a5.969 5.969 0 01-.474-.065 4.48 4.48 0 00.978-2.025c.09-.457-.133-.901-.467-1.226C3.93 16.178 3 14.189 3 12c0-4.556 4.03-8.25 9-8.25s9 3.694 9 8.25z"
             />
           </svg>
           <svg

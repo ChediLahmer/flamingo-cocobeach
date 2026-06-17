@@ -9,11 +9,11 @@ export default function Contact({ config }) {
   const rtl = dir === "rtl";
 
   return (
-    <section id="contact" className="py-32 relative" ref={ref}>
+    <section id="contact" className="py-32 relative overflow-hidden" ref={ref}>
       {/* Decorative top border */}
       <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-flamingo/30 to-transparent" />
 
-      <div className="max-w-7xl mx-auto px-6">
+      <div className="relative z-10 max-w-7xl mx-auto px-6">
         <motion.div
           className="text-center mb-16"
           initial={{ opacity: 0, y: 40 }}

@@ -22,6 +22,14 @@ const routes = [
       { path: "menu", component: () => import("./pages/Menu.vue") },
       { path: "spaces", component: () => import("./pages/Spaces.vue") },
       { path: "gallery", component: () => import("./pages/Gallery.vue") },
+      {
+        path: "flash-sales",
+        component: () => import("./pages/FlashSales.vue"),
+      },
+      {
+        path: "testimonials",
+        component: () => import("./pages/Testimonials.vue"),
+      },
       { path: "config", component: () => import("./pages/Config.vue") },
     ],
   },
