@@ -213,22 +213,22 @@ docker compose -f docker-compose.prod.yml exec backend node prisma/seed.js
 
 ## 11. Environment variable reference (`.env`)
 
-| Variable             | Example                          | Notes                                         |
-| -------------------- | -------------------------------- | --------------------------------------------- |
-| `DOMAIN`             | `flamingococobeach.com`          | Apex domain, no scheme.                       |
-| `ACME_EMAIL`         | `admin@flamingococobeach.com`    | Let's Encrypt registration email.             |
-| `DB_USER`            | `flamingo`                       | Postgres user.                                |
-| `DB_PASSWORD`        | _(strong)_                       | Postgres password.                            |
-| `DB_NAME`            | `flamingo`                       | Database name.                                |
-| `S3_ACCESS_KEY`      | _(strong)_                       | MinIO root user.                              |
-| `S3_SECRET_KEY`      | _(strong)_                       | MinIO root password.                          |
-| `S3_BUCKET`          | `flamingo`                       | Bucket name (created by `minio-init`).        |
-| `S3_REGION`          | `us-east-1`                      | Any value; MinIO ignores it.                  |
-| `JWT_SECRET`         | _(long random)_                  | Signs admin/user JWTs.                        |
-| `ADMIN_EMAIL`        | `admin@flamingococobeach.com`    | First admin login (used by `prisma/seed.js`). |
-| `ADMIN_PASSWORD`     | _(strong)_                       | First admin password. Change after go-live.   |
-| `BREVO_API_KEY`      | `xkeysib-…`                      | Brevo **REST** key (not SMTP).                |
-| `BREVO_SENDER_EMAIL` | `no-reply@flamingococobeach.com` | Must be a **verified** Brevo sender.          |
+| Variable             | Example                            | Notes                                         |
+| -------------------- | ---------------------------------- | --------------------------------------------- |
+| `DOMAIN`             | `flamingocoucoubeach.com`          | Apex domain, no scheme.                       |
+| `ACME_EMAIL`         | `admin@flamingocoucoubeach.com`    | Let's Encrypt registration email.             |
+| `DB_USER`            | `flamingo`                         | Postgres user.                                |
+| `DB_PASSWORD`        | _(strong)_                         | Postgres password.                            |
+| `DB_NAME`            | `flamingo`                         | Database name.                                |
+| `S3_ACCESS_KEY`      | _(strong)_                         | MinIO root user.                              |
+| `S3_SECRET_KEY`      | _(strong)_                         | MinIO root password.                          |
+| `S3_BUCKET`          | `flamingo`                         | Bucket name (created by `minio-init`).        |
+| `S3_REGION`          | `us-east-1`                        | Any value; MinIO ignores it.                  |
+| `JWT_SECRET`         | _(long random)_                    | Signs admin/user JWTs.                        |
+| `ADMIN_EMAIL`        | `admin@flamingocoucoubeach.com`    | First admin login (used by `prisma/seed.js`). |
+| `ADMIN_PASSWORD`     | _(strong)_                         | First admin password. Change after go-live.   |
+| `BREVO_API_KEY`      | `xkeysib-…`                        | Brevo **REST** key (not SMTP).                |
+| `BREVO_SENDER_EMAIL` | `no-reply@flamingocoucoubeach.com` | Must be a **verified** Brevo sender.          |
 
 Derived automatically by compose (no need to set): `DATABASE_URL`, `S3_ENDPOINT` (internal), `S3_PUBLIC_URL=https://storage.<domain>`, `S3_UPLOAD_URL=https://upload.<domain>`, `CORS_ORIGIN`, `CLIENT_URL`, `ADMIN_URL`.
 

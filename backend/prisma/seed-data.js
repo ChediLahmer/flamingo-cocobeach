@@ -37,8 +37,8 @@ async function main() {
       ar: "طريق الكورنيش، المرسى، تونس",
     }),
     instagram: "https://instagram.com/flamingo.cocobeach",
-    facebook: "https://facebook.com/flamingococobeach",
-    tiktok: "https://tiktok.com/@flamingococobeach",
+    facebook: "https://facebook.com/flamingocoucoubeach",
+    tiktok: "https://tiktok.com/@flamingocoucoubeach",
     hours: JSON.stringify({
       fr: "Lun-Dim: 10h00 - 02h00",
       en: "Mon-Sun: 10:00 AM - 2:00 AM",

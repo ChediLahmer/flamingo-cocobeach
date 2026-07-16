@@ -130,8 +130,10 @@ services:
       # Used once by `prisma/seed.js` to create the first admin (see DEPLOYMENT.md).
       ADMIN_EMAIL: ${ADMIN_EMAIL}
       ADMIN_PASSWORD: ${ADMIN_PASSWORD}
+    # flamingo has no committed Prisma migrations (schema is managed via db push),
+    # so sync the schema on start instead of `migrate deploy`.
     command: >
-      sh -c "npx prisma migrate deploy && node src/index.js"
+      sh -c "npx prisma db push --skip-generate && node src/index.js"
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.api.rule=Host(`api.${DOMAIN}`)"
