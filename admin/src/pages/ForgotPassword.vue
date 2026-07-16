@@ -54,7 +54,7 @@
             type="email"
             required
             class="w-full px-4 py-2.5 border border-border rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-colors"
-            placeholder="admin@flamingo-cocobeach.com"
+            placeholder="admin@flamingocoucoubeach.com"
           />
         </div>
         <p v-if="error" class="text-danger text-sm">{{ error }}</p>

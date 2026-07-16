@@ -4,7 +4,7 @@ import { PrismaClient } from "@prisma/client";
 const prisma = new PrismaClient();
 
 async function main() {
-  const email = process.env.ADMIN_EMAIL || "admin@flamingo-cocobeach.com";
+  const email = process.env.ADMIN_EMAIL || "admin@flamingocoucoubeach.com";
   const password = await bcrypt.hash(
     process.env.ADMIN_PASSWORD || "admin123",
     10,
@@ -45,7 +45,7 @@ async function main() {
       }),
     ],
     ["phone", "+216 00 000 000"],
-    ["email", "contact@flamingo-cocobeach.com"],
+    ["email", "contact@flamingocoucoubeach.com"],
     [
       "address",
       JSON.stringify({

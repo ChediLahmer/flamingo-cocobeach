@@ -176,7 +176,7 @@ Write-Success "Database schema applied"
 
 Write-Host "  Seeding database..."
 npm run db:seed
-Write-Success "Database seeded (admin: admin@flamingo-cocobeach.com / admin123)"
+Write-Success "Database seeded (admin: admin@flamingocoucoubeach.com / admin123)"
 
 Pop-Location
 
@@ -206,6 +206,6 @@ Write-Host "    Backend:  cd backend; npm run dev     (http://localhost:3000)" -
 Write-Host "    Client:   cd client; npm run dev      (http://localhost:5173)" -ForegroundColor Gray
 Write-Host "    Admin:    cd admin; npm run dev        (http://localhost:5174)" -ForegroundColor Gray
 Write-Host ""
-Write-Host "  Admin login: admin@flamingo-cocobeach.com / admin123" -ForegroundColor Gray
+  Write-Host "  Admin login: admin@flamingocoucoubeach.com / admin123" -ForegroundColor Gray
 Write-Host "  MinIO Console: http://localhost:9001 (minioadmin/minioadmin)" -ForegroundColor Gray
 Write-Host ""

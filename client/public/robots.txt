@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://flamingo-cocobeach.com/sitemap.xml
+Sitemap: https://flamingocoucoubeach.com/sitemap.xml

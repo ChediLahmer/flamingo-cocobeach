@@ -42,7 +42,7 @@ services:
       - key: BREVO_API_KEY
         sync: false
       - key: BREVO_SENDER_EMAIL
-        value: noreply@flamingo-cocobeach.com
+        value: noreply@flamingocoucoubeach.com
       - key: ADMIN_URL
         sync: false
 

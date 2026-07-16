@@ -12,7 +12,8 @@ export async function sendPasswordResetEmail(toEmail, resetUrl) {
   await brevo.transactionalEmails.sendTransacEmail({
     sender: {
       name: "Flamingo Coco Beach",
-      email: process.env.BREVO_SENDER_EMAIL || "noreply@flamingo-cocobeach.com",
+      email:
+        process.env.BREVO_SENDER_EMAIL || "noreply@flamingocoucoubeach.com",
     },
     to: [{ email: toEmail }],
     subject: "Réinitialisation de votre mot de passe",
@@ -33,7 +34,8 @@ export async function sendUserPasswordResetEmail(toEmail, resetUrl) {
   await brevo.transactionalEmails.sendTransacEmail({
     sender: {
       name: "Flamingo Coco Beach",
-      email: process.env.BREVO_SENDER_EMAIL || "noreply@flamingo-cocobeach.com",
+      email:
+        process.env.BREVO_SENDER_EMAIL || "noreply@flamingocoucoubeach.com",
     },
     to: [{ email: toEmail }],
     subject: "Réinitialisation de votre mot de passe",
@@ -59,11 +61,12 @@ export async function sendUserPasswordResetEmail(toEmail, resetUrl) {
 
 export async function sendWelcomeEmail(toEmail, name, siteUrl) {
   const greeting = name ? `Bonjour ${name}` : "Bonjour";
-  const cta = siteUrl || "https://flamingo-cocobeach.com";
+  const cta = siteUrl || "https://flamingocoucoubeach.com";
   await brevo.transactionalEmails.sendTransacEmail({
     sender: {
       name: "Flamingo Coco Beach",
-      email: process.env.BREVO_SENDER_EMAIL || "noreply@flamingo-cocobeach.com",
+      email:
+        process.env.BREVO_SENDER_EMAIL || "noreply@flamingocoucoubeach.com",
     },
     to: [{ email: toEmail }],
     subject: "🦩 Bienvenue chez Flamingo Coco Beach !",

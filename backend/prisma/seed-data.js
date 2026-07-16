@@ -28,7 +28,7 @@ async function main() {
       en: "A unique place where the beach meets the party. Tropical cocktails, delicious cuisine and an electric atmosphere that will transport you to the tropics.",
       ar: "مكان فريد حيث يلتقي الشاطئ بالحفلة. كوكتيلات استوائية، مأكولات شهية وأجواء كهربائية تنقلك إلى المناطق الاستوائية.",
     }),
-    email: "contact@flamingo-cocobeach.com",
+    email: "contact@flamingocoucoubeach.com",
     phone: "+216 71 123 456",
     whatsapp: "21671123456",
     address: JSON.stringify({
@@ -37,8 +37,8 @@ async function main() {
       ar: "طريق الكورنيش، المرسى، تونس",
     }),
     instagram: "https://instagram.com/flamingo.cocobeach",
-    facebook: "https://facebook.com/flamingocoucoubeach",
-    tiktok: "https://tiktok.com/@flamingocoucoubeach",
+    facebook: "https://facebook.com/flamingococobeach",
+    tiktok: "https://tiktok.com/@flamingococobeach",
     hours: JSON.stringify({
       fr: "Lun-Dim: 10h00 - 02h00",
       en: "Mon-Sun: 10:00 AM - 2:00 AM",
