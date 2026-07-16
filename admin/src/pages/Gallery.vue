@@ -20,6 +20,7 @@ const catForm = ref({ fr: "", en: "", ar: "" });
 const loading = ref(false);
 const error = ref(null);
 const page = ref(1);
+const previewImg = ref(null);
 
 const imageCount = computed(() => allImages.value.length);
 const totalPages = computed(() =>
@@ -167,6 +168,13 @@ async function updateImage(img, data) {
     Object.assign(img, prev);
     toast.error(e?.message || "Erreur de mise à jour.");
   }
+}
+
+function openPreview(img) {
+  previewImg.value = img;
+}
+function closePreview() {
+  previewImg.value = null;
 }
 
 async function saveCat() {
@@ -429,16 +437,33 @@ async function deleteCat(cat) {
             Traitement…
           </button>
           <div
-            class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2"
+            v-if="isVideoUrl(img.url)"
+            class="absolute inset-0 flex items-center justify-center pointer-events-none"
+          >
+            <span
+              class="flex h-11 w-11 items-center justify-center rounded-full bg-black/50"
+            >
+              <svg
+                class="h-5 w-5 text-white"
+                fill="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path d="M8 5v14l11-7z" />
+              </svg>
+            </span>
+          </div>
+          <div
+            @click.self="openPreview(img)"
+            class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2 cursor-pointer"
           >
             <button
-              @click="toggleVisibility(img)"
+              @click.stop="toggleVisibility(img)"
               class="px-3 py-1.5 rounded-lg text-xs font-medium bg-white/90 text-text hover:bg-white transition-colors"
             >
               {{ img.visible ? "Masquer" : "Afficher" }}
             </button>
             <button
-              @click="deleteImage(img)"
+              @click.stop="deleteImage(img)"
               class="px-3 py-1.5 rounded-lg text-xs font-medium bg-danger/90 text-white hover:bg-danger transition-colors"
             >
               Supprimer
@@ -598,5 +623,35 @@ async function deleteCat(cat) {
         </div>
       </Transition>
     </Teleport>
+
+    <!-- Media preview lightbox -->
+    <div
+      v-if="previewImg"
+      class="fixed inset-0 z-[60] flex items-center justify-center bg-black/90 p-6"
+      @click="closePreview"
+    >
+      <video
+        v-if="isVideoUrl(previewImg.url)"
+        :src="previewImg.url"
+        class="max-w-full max-h-[85vh] rounded-2xl bg-black"
+        controls
+        autoplay
+        playsinline
+        @click.stop
+      />
+      <img
+        v-else
+        :src="previewImg.url"
+        :alt="previewImg.alt || ''"
+        class="max-w-full max-h-[85vh] rounded-2xl object-contain"
+        @click.stop
+      />
+      <button
+        @click="closePreview"
+        class="absolute top-4 right-4 text-white/80 hover:text-white text-3xl leading-none"
+      >
+        ✕
+      </button>
+    </div>
   </div>
 </template>
