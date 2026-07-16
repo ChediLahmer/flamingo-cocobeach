@@ -26,7 +26,7 @@ export default function Hero({ config }) {
   return (
     <section
       id="hero"
-      className="relative h-screen flex items-center justify-center overflow-hidden"
+      className="relative h-[100svh] flex items-center justify-center overflow-hidden"
     >
       {/* Background video/image */}
       {config.hero_video_url ? (

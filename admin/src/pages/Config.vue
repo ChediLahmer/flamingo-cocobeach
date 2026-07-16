@@ -64,7 +64,7 @@
                   <label
                     class="inline-flex items-center gap-2 px-4 py-2 bg-primary/5 hover:bg-primary/10 border border-border rounded-lg cursor-pointer transition-colors text-sm font-medium text-text"
                     :class="
-                      uploadingKey === field.key
+                      isUploading(field.key)
                         ? 'opacity-60 pointer-events-none'
                         : ''
                     "
@@ -89,14 +89,13 @@
                       @change="(e) => uploadMedia(field.key, e)"
                       accept="image/*,video/*"
                       class="hidden"
-                      :disabled="uploadingKey === field.key"
+                      :disabled="isUploading(field.key)"
                     />
                   </label>
 
                   <span
                     v-if="
-                      uploadingKey !== field.key &&
-                      isProcessing(config[field.key])
+                      !isUploading(field.key) && isProcessing(config[field.key])
                     "
                     class="inline-flex items-center gap-1.5 text-xs text-amber-600 font-medium"
                   >
@@ -104,14 +103,13 @@
                     Vidéo en cours de traitement…
                   </span>
                   <span
-                    v-else-if="uploadingKey !== field.key && config[field.key]"
+                    v-else-if="!isUploading(field.key) && config[field.key]"
                     class="text-xs text-success font-medium"
                     >✓ Fichier uploadé</span
                   >
                   <button
                     v-if="
-                      uploadingKey !== field.key &&
-                      isProcessing(config[field.key])
+                      !isUploading(field.key) && isProcessing(config[field.key])
                     "
                     type="button"
                     @click="retryProcessing"
@@ -119,22 +117,30 @@
                   >
                     Relancer
                   </button>
+                  <button
+                    v-if="!isUploading(field.key) && config[field.key]"
+                    type="button"
+                    @click="removeMedia(field.key)"
+                    class="text-xs text-red-600 hover:text-red-700 underline"
+                  >
+                    Supprimer
+                  </button>
                 </div>
 
                 <!-- Upload progress bar -->
-                <div v-if="uploadingKey === field.key" class="max-w-md">
+                <div v-if="isUploading(field.key)" class="max-w-md">
                   <div class="flex items-center gap-2">
                     <div
                       class="flex-1 h-2 rounded-full bg-border overflow-hidden"
                     >
                       <div
                         class="h-full bg-primary rounded-full transition-all duration-300 ease-out"
-                        :style="{ width: uploadPct + '%' }"
+                        :style="{ width: getUploadProgress(field.key) + '%' }"
                       ></div>
                     </div>
                     <span
                       class="text-xs font-medium text-text-muted tabular-nums"
-                      >{{ uploadPct }}%</span
+                      >{{ getUploadProgress(field.key) }}%</span
                     >
                   </div>
                 </div>
@@ -219,8 +225,8 @@ const api = useApi();
 const toast = useToast();
 const saving = ref(false);
 const loaded = ref(false);
-const uploadingKey = ref(null);
-const uploadPct = ref(0);
+const uploading = ref({});
+const uploadProgress = ref({});
 
 const MULTILINGUAL_KEYS = new Set([
   "name",
@@ -355,11 +361,11 @@ async function uploadMedia(key, e) {
   if (!file) return;
   const fd = new FormData();
   fd.append("file", file);
-  uploadingKey.value = key;
-  uploadPct.value = 0;
+  uploading.value[key] = true;
+  uploadProgress.value[key] = 0;
   try {
     const { url } = await api.upload("/upload", fd, {
-      onProgress: (p) => (uploadPct.value = p),
+      onProgress: (p) => (uploadProgress.value[key] = p),
     });
     config.value[key] = url;
     // Persist immediately (matches ilot) so the backend promotion is triggered
@@ -369,8 +375,27 @@ async function uploadMedia(key, e) {
   } catch (err) {
     toast.error(err?.message || "Échec de l'envoi du fichier.");
   } finally {
-    uploadingKey.value = null;
+    uploading.value[key] = false;
+    delete uploadProgress.value[key];
     e.target.value = "";
+  }
+}
+
+function isUploading(key) {
+  return Boolean(uploading.value[key]);
+}
+
+function getUploadProgress(key) {
+  return uploadProgress.value[key] ?? 0;
+}
+
+async function removeMedia(key) {
+  try {
+    config.value[key] = "";
+    await api.put(`/config/${key}`, { value: "" });
+    toast.success("Média supprimé.");
+  } catch (err) {
+    toast.error(err?.message || "Échec de la suppression.");
   }
 }
 
