@@ -111,6 +111,51 @@ async function loadData() {
 
 onMounted(loadData);
 
+function isVideoUrl(url) {
+  return /\.(mp4|webm|ogg|mov|m4v|mkv|avi)(\?|$)/i.test(url || "");
+}
+function isProcessing(url) {
+  return typeof url === "string" && url.includes("/incoming/");
+}
+async function retryProcessing() {
+  try {
+    await api.post("/upload/process-incoming");
+    toast.success("Traitement relancé. Cela peut prendre un instant.");
+  } catch (e) {
+    toast.error(e?.message || "Échec du relancement du traitement.");
+  }
+}
+async function refreshProcessingSilently() {
+  try {
+    if (!activeCategory.value) return;
+    const res = await api.get(
+      `/menu/items?categoryId=${activeCategory.value}&limit=100`,
+    );
+    const byId = new Map((res.items || []).map((it) => [it.id, it]));
+    for (const it of items.value) {
+      const f = byId.get(it.id);
+      if (f && f.image !== it.image) it.image = f.image;
+    }
+  } catch {
+    /* ignore transient polling errors */
+  }
+}
+let processingTimer = null;
+const hasItemProcessing = computed(() =>
+  items.value.some((it) => isProcessing(it.image)),
+);
+watch(hasItemProcessing, (active) => {
+  if (active && !processingTimer) {
+    processingTimer = setInterval(refreshProcessingSilently, 5000);
+  } else if (!active && processingTimer) {
+    clearInterval(processingTimer);
+    processingTimer = null;
+  }
+});
+onUnmounted(() => {
+  if (processingTimer) clearInterval(processingTimer);
+});
+
 watch([itemSort, itemSortDir, filterAvailable, filterVisible], () => {
   itemPage.value = 1;
   loadItems();
@@ -579,9 +624,17 @@ onUnmounted(() => {
               class="w-10 h-10 rounded-lg bg-surface-alt flex items-center justify-center shrink-0 overflow-hidden"
             >
               <img
-                v-if="item.image"
+                v-if="item.image && !isVideoUrl(item.image)"
                 :src="item.image"
                 class="w-full h-full object-cover"
+              />
+              <video
+                v-else-if="item.image"
+                :src="item.image"
+                class="w-full h-full object-cover"
+                muted
+                playsinline
+                preload="metadata"
               />
               <svg
                 v-else
@@ -1138,7 +1191,7 @@ onUnmounted(() => {
                 >
                 <input
                   type="file"
-                  accept="image/*"
+                  accept="image/*,video/*"
                   @change="onFileChange"
                   class="w-full text-sm file:mr-3 file:px-3 file:py-1.5 file:border-0 file:rounded-lg file:bg-primary/10 file:text-primary file:font-medium file:cursor-pointer"
                 />

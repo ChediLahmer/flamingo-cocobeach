@@ -1,4 +1,5 @@
 import { Link } from "react-router-dom";
+import SmartMedia from "../components/SmartMedia";
 import { motion } from "framer-motion";
 import { useLanguage } from "../i18n/LanguageContext";
 import { useUserAuth } from "../auth/UserAuthContext";
@@ -107,7 +108,7 @@ export default function AccountPage() {
                   className="group relative flex gap-4 rounded-2xl border border-flamingo/10 bg-white/80 p-4 shadow-sm backdrop-blur"
                 >
                   {item.image ? (
-                    <img
+                    <SmartMedia
                       src={item.image}
                       alt={localizedValue(item.name)}
                       className="h-20 w-20 shrink-0 rounded-xl object-cover"

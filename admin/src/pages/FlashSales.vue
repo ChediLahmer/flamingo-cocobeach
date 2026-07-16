@@ -1,5 +1,5 @@
 <script setup>
-import { ref, computed, onMounted } from "vue";
+import { ref, computed, onMounted, onUnmounted, watch } from "vue";
 import { useApi } from "../composables/useApi";
 import { useToast } from "../composables/useToast";
 
@@ -57,6 +57,48 @@ async function load() {
 }
 
 onMounted(load);
+
+function isVideoUrl(url) {
+  return /\.(mp4|webm|ogg|mov|m4v|mkv|avi)(\?|$)/i.test(url || "");
+}
+function isProcessing(url) {
+  return typeof url === "string" && url.includes("/incoming/");
+}
+async function retryProcessing() {
+  try {
+    await api.post("/upload/process-incoming");
+    toast.success("Traitement relancé. Cela peut prendre un instant.");
+  } catch (e) {
+    toast.error(e?.message || "Échec du relancement du traitement.");
+  }
+}
+async function refreshProcessingSilently() {
+  try {
+    const fresh = await api.get("/flash-sales");
+    const byId = new Map((fresh || []).map((s) => [s.id, s]));
+    for (const s of sales.value) {
+      const f = byId.get(s.id);
+      if (f && f.image !== s.image) s.image = f.image;
+    }
+  } catch {
+    /* ignore transient polling errors */
+  }
+}
+let processingTimer = null;
+const hasProcessing = computed(() =>
+  sales.value.some((s) => isProcessing(s.image)),
+);
+watch(hasProcessing, (active) => {
+  if (active && !processingTimer) {
+    processingTimer = setInterval(refreshProcessingSilently, 5000);
+  } else if (!active && processingTimer) {
+    clearInterval(processingTimer);
+    processingTimer = null;
+  }
+});
+onUnmounted(() => {
+  if (processingTimer) clearInterval(processingTimer);
+});
 
 function isExpired(sale) {
   return new Date(sale.endsAt).getTime() <= Date.now();
@@ -283,8 +325,16 @@ function fmtDate(d) {
         :class="{ 'opacity-60': !sale.visible || isExpired(sale) }"
       >
         <div class="relative">
+          <video
+            v-if="sale.image && isVideoUrl(sale.image)"
+            :src="sale.image"
+            class="w-full h-36 object-cover"
+            muted
+            playsinline
+            preload="metadata"
+          />
           <img
-            v-if="sale.image"
+            v-else-if="sale.image"
             :src="sale.image"
             class="w-full h-36 object-cover"
             loading="lazy"
@@ -295,6 +345,15 @@ function fmtDate(d) {
           >
             ⚡
           </div>
+          <button
+            v-if="isProcessing(sale.image)"
+            type="button"
+            @click="retryProcessing"
+            class="absolute bottom-2 left-2 px-2 py-0.5 rounded bg-amber-500/90 text-white text-[10px] font-medium"
+            title="Relancer le traitement"
+          >
+            ⏳ Traitement…
+          </button>
           <span
             class="absolute top-2 left-2 rounded-full bg-primary px-2.5 py-1 text-xs font-bold text-white shadow"
           >
@@ -511,7 +570,7 @@ function fmtDate(d) {
                 <input
                   type="file"
                   @change="onFileChange"
-                  accept="image/*"
+                  accept="image/*,video/*"
                   class="hidden"
                 />
               </label>

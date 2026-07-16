@@ -4,8 +4,11 @@ import { PrismaClient } from "@prisma/client";
 const prisma = new PrismaClient();
 
 async function main() {
-  const email = "admin@flamingo-cocobeach.com";
-  const password = await bcrypt.hash("admin123", 10);
+  const email = process.env.ADMIN_EMAIL || "admin@flamingo-cocobeach.com";
+  const password = await bcrypt.hash(
+    process.env.ADMIN_PASSWORD || "admin123",
+    10,
+  );
 
   await prisma.admin.upsert({
     where: { email },
@@ -13,7 +16,7 @@ async function main() {
     create: { email, password },
   });
 
-  console.log(`Admin seeded: ${email} / admin123`);
+  console.log(`Admin seeded: ${email}`);
 
   // Seed default config
   const defaults = [

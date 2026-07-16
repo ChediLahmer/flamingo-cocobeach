@@ -8,6 +8,11 @@ A showcase ("vitrine") website for Flamingo Coco Beach — fun, alive, and energ
 - **admin/** — Vue 3 admin backoffice (Vite + Tailwind)
 - **client/** — Public showcase site (Vite + React + Framer Motion + GSAP)
 
+## Deployment
+
+Production deployment (single VPS, Traefik + HTTPS, MinIO, optional Cloudflare CDN,
+async large-video pipeline) is documented in **[DEPLOYMENT.md](DEPLOYMENT.md)**.
+
 ## Admin Features
 
 - Media management (upload images/videos)

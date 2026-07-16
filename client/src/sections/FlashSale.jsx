@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
+import SmartMedia from "../components/SmartMedia";
 import { motion } from "framer-motion";
 import { useLanguage } from "../i18n/LanguageContext";
 import { API_BASE } from "../lib/api";
@@ -222,7 +223,7 @@ export default function FlashSale() {
                 className="group relative flex min-h-[20rem] w-[85%] shrink-0 snap-start flex-col justify-between overflow-hidden rounded-3xl text-white shadow-xl sm:w-[calc(50%-0.75rem)] lg:w-[calc(33.333%-1rem)]"
               >
                 {sale.image ? (
-                  <img
+                  <SmartMedia
                     src={sale.image}
                     alt={localizedValue(sale.title)}
                     className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 group-hover:scale-110"

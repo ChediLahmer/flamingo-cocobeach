@@ -1,4 +1,5 @@
 import { motion, useInView } from "framer-motion";
+import SmartMedia, { isVideoUrl } from "../components/SmartMedia";
 import { useRef, useState, useEffect } from "react";
 import { API_BASE } from "../lib/api";
 
@@ -89,7 +90,7 @@ export default function Gallery() {
               onClick={() => setLightbox(img)}
             >
               <div className="relative rounded-2xl overflow-hidden">
-                <img
+                <SmartMedia
                   src={img.url}
                   alt={img.alt || ""}
                   className="w-full object-cover group-hover:scale-105 transition-transform duration-500"
@@ -116,14 +117,28 @@ export default function Gallery() {
           animate={{ opacity: 1 }}
           onClick={() => setLightbox(null)}
         >
-          <motion.img
-            src={lightbox.url}
-            alt={lightbox.alt || ""}
-            className="max-w-full max-h-[85vh] rounded-2xl object-contain"
-            initial={{ scale: 0.8 }}
-            animate={{ scale: 1 }}
-            transition={{ type: "spring", stiffness: 300 }}
-          />
+          {isVideoUrl(lightbox.url) ? (
+            <motion.video
+              src={lightbox.url}
+              className="max-w-full max-h-[85vh] rounded-2xl object-contain"
+              controls
+              autoPlay
+              playsInline
+              initial={{ scale: 0.8 }}
+              animate={{ scale: 1 }}
+              transition={{ type: "spring", stiffness: 300 }}
+              onClick={(e) => e.stopPropagation()}
+            />
+          ) : (
+            <motion.img
+              src={lightbox.url}
+              alt={lightbox.alt || ""}
+              className="max-w-full max-h-[85vh] rounded-2xl object-contain"
+              initial={{ scale: 0.8 }}
+              animate={{ scale: 1 }}
+              transition={{ type: "spring", stiffness: 300 }}
+            />
+          )}
           <button
             onClick={() => setLightbox(null)}
             className="absolute top-6 right-6 text-white text-3xl hover:text-flamingo"

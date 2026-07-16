@@ -1,4 +1,5 @@
 import { motion, useInView } from "framer-motion";
+import SmartMedia from "../components/SmartMedia";
 import { useRef, useState, useEffect } from "react";
 import { useLanguage } from "../i18n/LanguageContext";
 import { API_BASE } from "../lib/api";
@@ -81,7 +82,7 @@ export default function Menu() {
               transition={{ delay: i * 0.05 }}
             >
               {item.image && (
-                <img
+                <SmartMedia
                   src={item.image}
                   alt={localizedValue(item.name)}
                   className="w-20 h-20 rounded-xl object-cover flex-shrink-0"

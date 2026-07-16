@@ -86,17 +86,28 @@
                   />
                 </label>
                 <img
-                  v-if="
-                    config[field.key] && !config[field.key].includes('video')
-                  "
+                  v-if="config[field.key] && !isVideoUrl(config[field.key])"
                   :src="config[field.key]"
                   class="w-12 h-12 rounded object-cover border"
                 />
                 <span
-                  v-if="config[field.key]"
-                  class="text-xs text-success font-medium"
-                  >✓ Fichier uploade</span
+                  v-if="isProcessing(config[field.key])"
+                  class="text-xs text-amber-600 font-medium"
+                  >⏳ Vidéo en cours de traitement…</span
                 >
+                <span
+                  v-else-if="config[field.key]"
+                  class="text-xs text-success font-medium"
+                  >✓ Fichier uploadé</span
+                >
+                <button
+                  v-if="isProcessing(config[field.key])"
+                  type="button"
+                  @click="retryProcessing"
+                  class="text-xs text-primary underline"
+                >
+                  Relancer
+                </button>
               </div>
             </template>
             <template v-else-if="field.type === 'textarea'">
@@ -153,7 +164,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from "vue";
+import { ref, computed, watch, onMounted, onUnmounted } from "vue";
 import { useApi } from "../composables/useApi";
 import { useToast } from "../composables/useToast";
 
@@ -298,6 +309,58 @@ async function uploadMedia(key, e) {
   const { url } = await api.upload("/upload", fd);
   config.value[key] = url;
 }
+
+const mediaKeys = configGroups.flatMap((g) =>
+  g.fields.filter((f) => f.type === "media").map((f) => f.key),
+);
+
+function isVideoUrl(url) {
+  return /\.(mp4|webm|ogg|mov|m4v|mkv|avi)(\?|$)/i.test(url || "");
+}
+
+function isProcessing(url) {
+  return typeof url === "string" && url.includes("/incoming/");
+}
+
+async function retryProcessing() {
+  try {
+    await api.post("/upload/process-incoming");
+    toast.success("Traitement relancé. Cela peut prendre un instant.");
+  } catch (e) {
+    toast.error(e?.message || "Échec du relancement du traitement.");
+  }
+}
+
+// Silently refresh only the media keys while a video is processing so the
+// badge clears itself without disturbing other fields the user is editing.
+async function refreshProcessingSilently() {
+  try {
+    const fresh = await api.get("/config");
+    for (const k of mediaKeys) {
+      if (fresh[k] !== undefined && config.value[k] !== fresh[k]) {
+        config.value[k] = fresh[k];
+      }
+    }
+  } catch {
+    /* ignore transient polling errors */
+  }
+}
+
+let processingTimer = null;
+const hasProcessing = computed(() =>
+  mediaKeys.some((k) => isProcessing(config.value[k])),
+);
+watch(hasProcessing, (active) => {
+  if (active && !processingTimer) {
+    processingTimer = setInterval(refreshProcessingSilently, 5000);
+  } else if (!active && processingTimer) {
+    clearInterval(processingTimer);
+    processingTimer = null;
+  }
+});
+onUnmounted(() => {
+  if (processingTimer) clearInterval(processingTimer);
+});
 
 async function save() {
   const REQUIRED_MULTILINGUAL = [

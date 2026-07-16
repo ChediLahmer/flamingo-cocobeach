@@ -1,6 +1,6 @@
 import { prisma } from "../lib/prisma.js";
 import { authenticate, optionalAuth } from "../lib/auth.js";
-import { deleteFile } from "../lib/storage.js";
+import { deleteFile, isIncomingUrl } from "../lib/storage.js";
 import {
   validateMultilingual,
   validateIntegerId,
@@ -64,8 +64,13 @@ export async function spacesRoutes(app) {
       }),
       prisma.space.count({ where }),
     ]);
+    const cleaned = request.admin
+      ? items
+      : items.map((s) =>
+          s.image && isIncomingUrl(s.image) ? { ...s, image: null } : s,
+        );
     return {
-      items,
+      items: cleaned,
       total,
       page: pageNum,
       totalPages: Math.ceil(total / limit),

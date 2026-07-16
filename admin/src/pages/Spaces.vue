@@ -1,5 +1,5 @@
 <script setup>
-import { ref, computed, onMounted, watch } from "vue";
+import { ref, computed, onMounted, onUnmounted, watch } from "vue";
 import { useApi } from "../composables/useApi";
 import { useToast } from "../composables/useToast";
 
@@ -89,6 +89,48 @@ async function load() {
     loading.value = false;
   }
 }
+
+function isVideoUrl(url) {
+  return /\.(mp4|webm|ogg|mov|m4v|mkv|avi)(\?|$)/i.test(url || "");
+}
+function isProcessing(url) {
+  return typeof url === "string" && url.includes("/incoming/");
+}
+async function retryProcessing() {
+  try {
+    await api.post("/upload/process-incoming");
+    toast.success("Traitement relancé. Cela peut prendre un instant.");
+  } catch (e) {
+    toast.error(e?.message || "Échec du relancement du traitement.");
+  }
+}
+async function refreshProcessingSilently() {
+  try {
+    const res = await api.get("/spaces?limit=100");
+    const byId = new Map((res.items || []).map((s) => [s.id, s]));
+    for (const s of spaces.value) {
+      const f = byId.get(s.id);
+      if (f && f.image !== s.image) s.image = f.image;
+    }
+  } catch {
+    /* ignore transient polling errors */
+  }
+}
+let processingTimer = null;
+const hasProcessing = computed(() =>
+  spaces.value.some((s) => isProcessing(s.image)),
+);
+watch(hasProcessing, (active) => {
+  if (active && !processingTimer) {
+    processingTimer = setInterval(refreshProcessingSilently, 5000);
+  } else if (!active && processingTimer) {
+    clearInterval(processingTimer);
+    processingTimer = null;
+  }
+});
+onUnmounted(() => {
+  if (processingTimer) clearInterval(processingTimer);
+});
 
 function goToPage(p) {
   page.value = p;
@@ -374,12 +416,31 @@ async function toggleVisible(space) {
         :key="space.id"
         class="rounded-2xl border border-border bg-surface shadow-sm overflow-hidden hover:shadow-md transition-shadow"
       >
-        <img
-          v-if="space.image"
-          :src="space.image"
-          class="w-full h-40 object-cover"
-          loading="lazy"
-        />
+        <div v-if="space.image" class="relative">
+          <video
+            v-if="isVideoUrl(space.image)"
+            :src="space.image"
+            class="w-full h-40 object-cover"
+            muted
+            playsinline
+            preload="metadata"
+          />
+          <img
+            v-else
+            :src="space.image"
+            class="w-full h-40 object-cover"
+            loading="lazy"
+          />
+          <button
+            v-if="isProcessing(space.image)"
+            type="button"
+            @click="retryProcessing"
+            class="absolute top-2 left-2 px-2 py-0.5 rounded bg-amber-500/90 text-white text-[10px] font-medium"
+            title="Relancer le traitement"
+          >
+            ⏳ Traitement…
+          </button>
+        </div>
         <div
           v-else
           class="w-full h-40 bg-gradient-to-br from-primary/10 to-primary/5 flex items-center justify-center"
@@ -794,7 +855,7 @@ async function toggleVisible(space) {
                 >
                 <input
                   type="file"
-                  accept="image/*"
+                  accept="image/*,video/*"
                   @change="onFileChange"
                   class="w-full text-sm file:mr-3 file:px-3 file:py-1.5 file:border-0 file:rounded-lg file:bg-primary/10 file:text-primary file:font-medium file:cursor-pointer"
                 />

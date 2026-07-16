@@ -1,5 +1,6 @@
 FROM node:22-alpine AS base
-RUN apk add --no-cache python3 make g++
+# ffmpeg is required by src/lib/media.js for video transcoding.
+RUN apk add --no-cache python3 make g++ ffmpeg
 WORKDIR /app
 
 COPY package.json ./

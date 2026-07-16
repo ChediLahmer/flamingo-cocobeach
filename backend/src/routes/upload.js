@@ -4,6 +4,7 @@ import {
   deleteFile,
   uploadFile,
 } from "../lib/storage.js";
+import { triggerIncomingProcessing } from "../lib/upload-cleanup.js";
 import { fileTypeFromBuffer } from "file-type";
 import { createHash } from "crypto";
 import {
@@ -29,12 +30,10 @@ export async function uploadRoutes(app) {
   app.post("/presign", { preHandler: authenticate }, async (request, reply) => {
     const { filename, contentType, sizeBytes } = request.body;
     if (!contentType?.startsWith("video/")) {
-      return reply
-        .status(400)
-        .send({
-          error: "VALIDATION_ERROR",
-          message: "Presigned uploads uniquement pour les vidéos.",
-        });
+      return reply.status(400).send({
+        error: "VALIDATION_ERROR",
+        message: "Presigned uploads uniquement pour les vidéos.",
+      });
     }
     if (!isBrowserMimeAllowed(contentType)) {
       return reply
@@ -42,16 +41,23 @@ export async function uploadRoutes(app) {
         .send({ error: "VALIDATION_ERROR", message: ERROR_MSG_BROWSER });
     }
     if (sizeBytes && sizeBytes > PRESIGN_MAX_VIDEO_BYTES) {
-      return reply
-        .status(400)
-        .send({
-          error: "VALIDATION_ERROR",
-          message: `Vidéo trop volumineuse (max ${Math.round(PRESIGN_MAX_VIDEO_BYTES / (1024 * 1024))} Mo).`,
-        });
+      return reply.status(400).send({
+        error: "VALIDATION_ERROR",
+        message: `Vidéo trop volumineuse (max ${Math.round(PRESIGN_MAX_VIDEO_BYTES / (1024 * 1024))} Mo).`,
+      });
     }
     const upload = await createPresignedUpload({ filename, contentType });
     return reply.send(upload);
   });
+
+  app.post(
+    "/process-incoming",
+    { preHandler: authenticate },
+    async (request, reply) => {
+      triggerIncomingProcessing(request.log);
+      return reply.status(202).send({ triggered: true });
+    },
+  );
 
   app.post(
     "/",

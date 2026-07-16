@@ -82,7 +82,10 @@ export async function galleryRoutes(app) {
     const limit = Math.min(Number(rawLimit) || 20, 100);
     const where = {};
     if (categoryId) where.categoryId = Number(categoryId);
-    if (!request.admin) where.visible = true;
+    if (!request.admin) {
+      where.visible = true;
+      where.url = { not: { contains: "/incoming/" } };
+    }
 
     const images = await prisma.galleryImage.findMany({
       where,
@@ -103,12 +106,10 @@ export async function galleryRoutes(app) {
       if (!request.isMultipart || !request.isMultipart()) {
         const { url, alt, categoryId, order } = request.body || {};
         if (!url)
-          return reply
-            .status(400)
-            .send({
-              error: "VALIDATION_ERROR",
-              message: "URL ou fichier requis",
-            });
+          return reply.status(400).send({
+            error: "VALIDATION_ERROR",
+            message: "URL ou fichier requis",
+          });
 
         let validCatId = null;
         if (categoryId) {

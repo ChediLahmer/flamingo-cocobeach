@@ -1,4 +1,5 @@
 import { motion, useInView } from "framer-motion";
+import SmartMedia from "../components/SmartMedia";
 import { useRef, useState, useEffect } from "react";
 import { useLanguage } from "../i18n/LanguageContext";
 import { API_BASE } from "../lib/api";
@@ -50,7 +51,7 @@ export default function Spaces() {
               {/* Image */}
               <div className="h-56 overflow-hidden">
                 {space.image ? (
-                  <img
+                  <SmartMedia
                     src={space.image}
                     alt={localizedValue(space.name)}
                     className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"

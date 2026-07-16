@@ -1,4 +1,5 @@
 import { motion } from "framer-motion";
+import SmartMedia from "../components/SmartMedia";
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { useLanguage } from "../i18n/LanguageContext";
@@ -66,7 +67,7 @@ export default function GalleryTeaser() {
               transition={{ delay: i * 0.05, duration: 0.4 }}
             >
               <div className="relative rounded-2xl overflow-hidden">
-                <img
+                <SmartMedia
                   src={img.url}
                   alt={img.alt || ""}
                   className="w-full object-cover group-hover:scale-105 transition-transform duration-500"

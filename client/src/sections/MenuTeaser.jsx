@@ -1,4 +1,5 @@
 import { motion } from "framer-motion";
+import SmartMedia from "../components/SmartMedia";
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { useLanguage } from "../i18n/LanguageContext";
@@ -101,7 +102,7 @@ export default function MenuTeaser() {
               transition={{ delay: i * 0.05 }}
             >
               {item.image && (
-                <img
+                <SmartMedia
                   src={item.image}
                   alt={localizedValue(item.name)}
                   className="w-20 h-20 rounded-xl object-cover flex-shrink-0"

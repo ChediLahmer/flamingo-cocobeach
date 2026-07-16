@@ -43,7 +43,12 @@ export default function Seo({ config = {}, title, description, path = "" }) {
       localizedValue(config.seo_description) ||
       localizedValue(config.tagline) ||
       "";
-    const image = config.og_image || config.hero_poster_url || "";
+    const image =
+      config.og_image ||
+      config.hero_poster_url ||
+      (typeof window !== "undefined"
+        ? `${window.location.origin}/og-image.jpg`
+        : "");
     const url =
       typeof window !== "undefined"
         ? `${window.location.origin}${path || window.location.pathname}`

@@ -1,4 +1,5 @@
 import { useEffect, useState, useCallback, useRef } from "react";
+import SmartMedia, { isVideoUrl } from "../components/SmartMedia";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import { useLanguage } from "../i18n/LanguageContext";
@@ -153,7 +154,7 @@ export default function GalleryPage() {
               onClick={() => setLightbox(img)}
             >
               <div className="relative rounded-2xl overflow-hidden">
-                <img
+                <SmartMedia
                   src={img.url}
                   alt={img.alt || ""}
                   className="w-full object-cover group-hover:scale-105 transition-transform duration-500"
@@ -195,14 +196,28 @@ export default function GalleryPage() {
           animate={{ opacity: 1 }}
           onClick={() => setLightbox(null)}
         >
-          <motion.img
-            src={lightbox.url}
-            alt={lightbox.alt || ""}
-            className="max-w-full max-h-[85vh] rounded-2xl object-contain"
-            initial={{ scale: 0.8 }}
-            animate={{ scale: 1 }}
-            transition={{ type: "spring", stiffness: 300 }}
-          />
+          {isVideoUrl(lightbox.url) ? (
+            <motion.video
+              src={lightbox.url}
+              className="max-w-full max-h-[85vh] rounded-2xl object-contain"
+              controls
+              autoPlay
+              playsInline
+              initial={{ scale: 0.8 }}
+              animate={{ scale: 1 }}
+              transition={{ type: "spring", stiffness: 300 }}
+              onClick={(e) => e.stopPropagation()}
+            />
+          ) : (
+            <motion.img
+              src={lightbox.url}
+              alt={lightbox.alt || ""}
+              className="max-w-full max-h-[85vh] rounded-2xl object-contain"
+              initial={{ scale: 0.8 }}
+              animate={{ scale: 1 }}
+              transition={{ type: "spring", stiffness: 300 }}
+            />
+          )}
           <button
             onClick={() => setLightbox(null)}
             className="absolute top-6 end-6 text-white text-3xl hover:text-flamingo"

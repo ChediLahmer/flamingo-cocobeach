@@ -1,6 +1,6 @@
 import { prisma } from "../lib/prisma.js";
 import { authenticate, optionalAuth } from "../lib/auth.js";
-import { deleteFile } from "../lib/storage.js";
+import { deleteFile, isIncomingUrl } from "../lib/storage.js";
 import {
   validateMultilingual,
   validateIntegerId,
@@ -15,16 +15,31 @@ export function invalidateMenuCache() {
 
 export async function menuRoutes(app) {
   app.get("/categories", { preHandler: optionalAuth }, async (request) => {
-    if (!request.admin && publicMenuCache) return publicMenuCache;
+    if (request.admin) {
+      return prisma.menuCategory.findMany({
+        include: { items: { where: {}, orderBy: { order: "asc" } } },
+        orderBy: { order: "asc" },
+      });
+    }
 
-    const itemWhere = request.admin ? {} : { visible: true, available: true };
-    const result = await prisma.menuCategory.findMany({
-      include: { items: { where: itemWhere, orderBy: { order: "asc" } } },
-      orderBy: { order: "asc" },
-    });
-
-    if (!request.admin) publicMenuCache = result;
-    return result;
+    if (!publicMenuCache) {
+      publicMenuCache = await prisma.menuCategory.findMany({
+        include: {
+          items: {
+            where: { visible: true, available: true },
+            orderBy: { order: "asc" },
+          },
+        },
+        orderBy: { order: "asc" },
+      });
+    }
+    // Hide item media still being processed (incoming/ URLs).
+    return publicMenuCache.map((cat) => ({
+      ...cat,
+      items: cat.items.map((it) =>
+        it.image && isIncomingUrl(it.image) ? { ...it, image: null } : it,
+      ),
+    }));
   });
 
   app.post(
@@ -134,8 +149,13 @@ export async function menuRoutes(app) {
       }),
       prisma.menuItem.count({ where }),
     ]);
+    const cleaned = request.admin
+      ? items
+      : items.map((it) =>
+          it.image && isIncomingUrl(it.image) ? { ...it, image: null } : it,
+        );
     return {
-      items,
+      items: cleaned,
       total,
       page: pageNum,
       totalPages: Math.ceil(total / limit),

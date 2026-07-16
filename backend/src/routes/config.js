@@ -1,6 +1,6 @@
 import { prisma } from "../lib/prisma.js";
-import { authenticate } from "../lib/auth.js";
-import { deleteFile } from "../lib/storage.js";
+import { authenticate, optionalAuth } from "../lib/auth.js";
+import { deleteFile, isIncomingUrl } from "../lib/storage.js";
 import { handleValidationError, ValidationError } from "../lib/validation.js";
 
 let configCache = null;
@@ -111,13 +111,21 @@ function parseConfigValue(key, raw) {
 }
 
 export async function configRoutes(app) {
-  app.get("/", async () => {
-    if (configCache) return configCache;
-    const configs = await prisma.siteConfig.findMany();
-    configCache = Object.fromEntries(
-      configs.map((c) => [c.key, parseConfigValue(c.key, c.value)]),
-    );
-    return configCache;
+  app.get("/", { preHandler: optionalAuth }, async (request) => {
+    if (!configCache) {
+      const configs = await prisma.siteConfig.findMany();
+      configCache = Object.fromEntries(
+        configs.map((c) => [c.key, parseConfigValue(c.key, c.value)]),
+      );
+    }
+    if (request.admin) return configCache;
+    // Public: hide media still being processed (incoming/ URLs).
+    const out = {};
+    for (const [k, v] of Object.entries(configCache)) {
+      out[k] =
+        MEDIA_KEYS.has(k) && typeof v === "string" && isIncomingUrl(v) ? "" : v;
+    }
+    return out;
   });
 
   app.put("/:key", { preHandler: authenticate }, async (request, reply) => {

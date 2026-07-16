@@ -16,6 +16,7 @@ import { passwordResetRoutes } from "./routes/password-reset.js";
 import { userRoutes } from "./routes/users.js";
 import { flashSaleRoutes } from "./routes/flash-sales.js";
 import { testimonialRoutes } from "./routes/testimonials.js";
+import { startScheduler } from "./lib/scheduler.js";
 
 if (process.env.NODE_ENV === "production") {
   const required = [
@@ -107,6 +108,7 @@ const port = process.env.PORT || 3000;
 
 try {
   await app.listen({ port, host: "0.0.0.0" });
+  startScheduler(app.log);
 } catch (err) {
   app.log.error(err);
   process.exit(1);

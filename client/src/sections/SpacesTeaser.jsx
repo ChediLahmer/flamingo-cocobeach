@@ -1,4 +1,5 @@
 import { motion } from "framer-motion";
+import SmartMedia from "../components/SmartMedia";
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { useLanguage } from "../i18n/LanguageContext";
@@ -69,7 +70,7 @@ export default function SpacesTeaser() {
             >
               <div className="h-56 overflow-hidden">
                 {space.image ? (
-                  <img
+                  <SmartMedia
                     src={space.image}
                     alt={localizedValue(space.name)}
                     className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"

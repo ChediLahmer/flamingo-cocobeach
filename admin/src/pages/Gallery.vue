@@ -1,5 +1,5 @@
 <script setup>
-import { ref, computed, onMounted, watch } from "vue";
+import { ref, computed, onMounted, onUnmounted, watch } from "vue";
 import { useApi } from "../composables/useApi";
 import { useToast } from "../composables/useToast";
 
@@ -60,6 +60,53 @@ onMounted(async () => {
 });
 
 watch(selectedCat, () => loadImages());
+
+function isVideoUrl(url) {
+  return /\.(mp4|webm|ogg|mov|m4v|mkv|avi)(\?|$)/i.test(url || "");
+}
+function isProcessing(url) {
+  return typeof url === "string" && url.includes("/incoming/");
+}
+async function retryProcessing() {
+  try {
+    await api.post("/upload/process-incoming");
+    toast.success("Traitement relancé. Cela peut prendre un instant.");
+  } catch (e) {
+    toast.error(e?.message || "Échec du relancement du traitement.");
+  }
+}
+// Silent in-place patch of only the urls that changed (incoming -> final) so
+// the grid never resets scroll/pagination while videos finish processing.
+async function refreshProcessingSilently() {
+  try {
+    const params = selectedCat.value
+      ? `?categoryId=${selectedCat.value}&limit=200`
+      : "?limit=200";
+    const res = await api.get(`/gallery${params}`);
+    const byId = new Map((res.items || []).map((it) => [it.id, it]));
+    for (const img of allImages.value) {
+      const f = byId.get(img.id);
+      if (f && f.url !== img.url) img.url = f.url;
+    }
+  } catch {
+    /* ignore transient polling errors */
+  }
+}
+let processingTimer = null;
+const hasProcessing = computed(() =>
+  allImages.value.some((img) => isProcessing(img.url)),
+);
+watch(hasProcessing, (active) => {
+  if (active && !processingTimer) {
+    processingTimer = setInterval(refreshProcessingSilently, 5000);
+  } else if (!active && processingTimer) {
+    clearInterval(processingTimer);
+    processingTimer = null;
+  }
+});
+onUnmounted(() => {
+  if (processingTimer) clearInterval(processingTimer);
+});
 
 async function onFiles(e) {
   const files = Array.from(e.target.files);
@@ -340,12 +387,30 @@ async function deleteCat(cat) {
         :key="img.id"
         class="relative group rounded-xl overflow-hidden border border-border shadow-sm hover:shadow-md transition-shadow"
       >
+        <video
+          v-if="isVideoUrl(img.url)"
+          :src="img.url"
+          class="w-full h-40 object-cover"
+          muted
+          playsinline
+          preload="metadata"
+        />
         <img
+          v-else
           :src="img.url"
           :alt="img.alt || ''"
           class="w-full h-40 object-cover"
           loading="lazy"
         />
+        <button
+          v-if="isProcessing(img.url)"
+          type="button"
+          @click="retryProcessing"
+          class="absolute top-2 left-2 z-10 px-2 py-0.5 rounded bg-amber-500/90 text-white text-[10px] font-medium"
+          title="Relancer le traitement"
+        >
+          ⏳ Traitement…
+        </button>
         <div
           class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2"
         >

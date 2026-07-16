@@ -1,6 +1,6 @@
 import { prisma } from "../lib/prisma.js";
 import { authenticate, optionalAuth } from "../lib/auth.js";
-import { deleteFile } from "../lib/storage.js";
+import { deleteFile, isIncomingUrl } from "../lib/storage.js";
 import {
   validateMultilingual,
   validateIntegerId,
@@ -89,14 +89,16 @@ export async function flashSaleRoutes(app) {
       });
     }
 
-    if (publicFlashCache) return publicFlashCache;
-    const now = new Date();
-    const result = await prisma.flashSale.findMany({
-      where: { visible: true, endsAt: { gt: now } },
-      orderBy: [{ order: "asc" }, { endsAt: "asc" }],
-    });
-    publicFlashCache = result;
-    return result;
+    if (!publicFlashCache) {
+      const now = new Date();
+      publicFlashCache = await prisma.flashSale.findMany({
+        where: { visible: true, endsAt: { gt: now } },
+        orderBy: [{ order: "asc" }, { endsAt: "asc" }],
+      });
+    }
+    return publicFlashCache.map((f) =>
+      f.image && isIncomingUrl(f.image) ? { ...f, image: null } : f,
+    );
   });
 
   app.post("/", { preHandler: authenticate }, async (request, reply) => {

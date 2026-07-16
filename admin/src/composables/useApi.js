@@ -26,12 +26,74 @@ export function useApi() {
     return res.json();
   }
 
+  function isVideoFile(file) {
+    if (!file) return false;
+    if (file.type?.startsWith("video/")) return true;
+    return /\.(mp4|webm|ogg|mov|m4v|mkv|avi)$/i.test(file.name || "");
+  }
+
+  // Videos upload presigned direct-to-storage (under incoming/) and are
+  // transcoded/promoted in the background, bypassing the sync 50MB/proxy path.
+  async function uploadVideoPresigned(file) {
+    const contentType = file.type || "video/mp4";
+    const presign = await request("/upload/presign", {
+      method: "POST",
+      body: { filename: file.name, contentType, sizeBytes: file.size },
+    });
+    const putRes = await fetch(presign.url, {
+      method: "PUT",
+      headers: { "Content-Type": contentType },
+      body: file,
+    });
+    if (!putRes.ok) {
+      throw new Error(`Échec de l'envoi vers le stockage (${putRes.status})`);
+    }
+    return { url: presign.publicUrl };
+  }
+
+  // Kick the background promote/transcode once an entity is saved with an
+  // incoming/ URL. Fire-and-forget; the boot + weekly sweeps are the fallback.
+  function maybeTriggerProcessing(body) {
+    try {
+      const s = typeof body === "string" ? body : JSON.stringify(body || "");
+      if (s.includes("/incoming/")) {
+        request("/upload/process-incoming", { method: "POST" }).catch(() => {});
+      }
+    } catch {
+      /* ignore */
+    }
+  }
+
   return {
     get: (path) => request(path),
-    post: (path, body) => request(path, { method: "POST", body }),
-    put: (path, body) => request(path, { method: "PUT", body }),
+    post: async (path, body) => {
+      const res = await request(path, { method: "POST", body });
+      maybeTriggerProcessing(body);
+      return res;
+    },
+    put: async (path, body) => {
+      const res = await request(path, { method: "PUT", body });
+      maybeTriggerProcessing(body);
+      return res;
+    },
     del: (path) => request(path, { method: "DELETE" }),
-    upload: (path, formData) =>
-      request(path, { method: "POST", body: formData }),
+    upload: async (path, formData) => {
+      const file = formData.get?.("file");
+      if (isVideoFile(file)) {
+        const { url } = await uploadVideoPresigned(file);
+        // /upload just returns the URL; the page then saves the entity and the
+        // post/put trigger kicks processing. Direct-create endpoints such as
+        // /gallery accept a JSON { url } body, so create + trigger here.
+        if (path === "/upload") return { url };
+        const categoryId = formData.get?.("categoryId");
+        const res = await request(path, {
+          method: "POST",
+          body: categoryId ? { url, categoryId } : { url },
+        });
+        maybeTriggerProcessing({ url });
+        return res;
+      }
+      return request(path, { method: "POST", body: formData });
+    },
   };
 }
