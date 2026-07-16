@@ -38,6 +38,9 @@ export function useApi() {
     return new Promise((resolve, reject) => {
       const xhr = new XMLHttpRequest();
       xhr.open(method, url);
+      // Ceiling for large video uploads so a stalled request aborts instead of
+      // hanging forever (the "timeout" listener below turns it into an error).
+      xhr.timeout = 15 * 60 * 1000;
       for (const [k, v] of Object.entries(headers)) {
         xhr.setRequestHeader(k, v);
       }

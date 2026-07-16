@@ -59,92 +59,101 @@
               </div>
             </template>
             <template v-else-if="field.type === 'media'">
-              <div class="flex items-center gap-3 flex-wrap">
-                <label
-                  class="inline-flex items-center gap-2 px-4 py-2 bg-primary/5 hover:bg-primary/10 border border-border rounded-lg cursor-pointer transition-colors text-sm font-medium text-text"
-                  :class="
-                    uploadingKey === field.key
-                      ? 'opacity-60 pointer-events-none'
-                      : ''
-                  "
-                >
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    class="h-4 w-4"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
+              <div class="space-y-3">
+                <div class="flex items-center gap-3 flex-wrap">
+                  <label
+                    class="inline-flex items-center gap-2 px-4 py-2 bg-primary/5 hover:bg-primary/10 border border-border rounded-lg cursor-pointer transition-colors text-sm font-medium text-text"
+                    :class="
+                      uploadingKey === field.key
+                        ? 'opacity-60 pointer-events-none'
+                        : ''
+                    "
                   >
-                    <path
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                      stroke-width="2"
-                      d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      class="h-4 w-4"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                    >
+                      <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
+                      />
+                    </svg>
+                    Parcourir
+                    <input
+                      type="file"
+                      @change="(e) => uploadMedia(field.key, e)"
+                      accept="image/*,video/*"
+                      class="hidden"
+                      :disabled="uploadingKey === field.key"
                     />
-                  </svg>
-                  Parcourir
-                  <input
-                    type="file"
-                    @change="(e) => uploadMedia(field.key, e)"
-                    accept="image/*,video/*"
-                    class="hidden"
-                    :disabled="uploadingKey === field.key"
-                  />
-                </label>
+                  </label>
 
-                <!-- Upload progress -->
-                <div
-                  v-if="uploadingKey === field.key"
-                  class="flex items-center gap-2 min-w-[160px]"
-                >
-                  <Spinner size-class="h-4 w-4" class="text-primary" />
-                  <div
-                    class="flex-1 h-1.5 rounded-full bg-border overflow-hidden"
+                  <span
+                    v-if="
+                      uploadingKey !== field.key &&
+                      isProcessing(config[field.key])
+                    "
+                    class="inline-flex items-center gap-1.5 text-xs text-amber-600 font-medium"
                   >
-                    <div
-                      class="h-full bg-primary transition-all duration-150"
-                      :style="{ width: uploadPct + '%' }"
-                    ></div>
-                  </div>
-                  <span class="text-xs text-text-muted tabular-nums"
-                    >{{ uploadPct }}%</span
+                    <Spinner size-class="h-3.5 w-3.5" />
+                    Vidéo en cours de traitement…
+                  </span>
+                  <span
+                    v-else-if="uploadingKey !== field.key && config[field.key]"
+                    class="text-xs text-success font-medium"
+                    >✓ Fichier uploadé</span
                   >
+                  <button
+                    v-if="
+                      uploadingKey !== field.key &&
+                      isProcessing(config[field.key])
+                    "
+                    type="button"
+                    @click="retryProcessing"
+                    class="text-xs text-primary underline"
+                  >
+                    Relancer
+                  </button>
                 </div>
 
-                <img
-                  v-else-if="
-                    config[field.key] && !isVideoUrl(config[field.key])
-                  "
-                  :src="config[field.key]"
-                  class="w-12 h-12 rounded object-cover border"
-                />
+                <!-- Upload progress bar -->
+                <div v-if="uploadingKey === field.key" class="max-w-md">
+                  <div class="flex items-center gap-2">
+                    <div
+                      class="flex-1 h-2 rounded-full bg-border overflow-hidden"
+                    >
+                      <div
+                        class="h-full bg-primary rounded-full transition-all duration-300 ease-out"
+                        :style="{ width: uploadPct + '%' }"
+                      ></div>
+                    </div>
+                    <span
+                      class="text-xs font-medium text-text-muted tabular-nums"
+                      >{{ uploadPct }}%</span
+                    >
+                  </div>
+                </div>
 
-                <span
-                  v-if="
-                    uploadingKey !== field.key &&
-                    isProcessing(config[field.key])
-                  "
-                  class="inline-flex items-center gap-1.5 text-xs text-amber-600 font-medium"
-                >
-                  <Spinner size-class="h-3.5 w-3.5" />
-                  Vidéo en cours de traitement…
-                </span>
-                <span
-                  v-else-if="uploadingKey !== field.key && config[field.key]"
-                  class="text-xs text-success font-medium"
-                  >✓ Fichier uploadé</span
-                >
-                <button
-                  v-if="
-                    uploadingKey !== field.key &&
-                    isProcessing(config[field.key])
-                  "
-                  type="button"
-                  @click="retryProcessing"
-                  class="text-xs text-primary underline"
-                >
-                  Relancer
-                </button>
+                <!-- Media preview -->
+                <video
+                  v-else-if="config[field.key] && isVideoUrl(config[field.key])"
+                  :src="config[field.key]"
+                  class="w-full max-w-md rounded-lg border border-border aspect-video object-cover bg-black"
+                  controls
+                  muted
+                  preload="metadata"
+                  playsinline
+                />
+                <img
+                  v-else-if="config[field.key]"
+                  :src="config[field.key]"
+                  class="w-full max-w-md rounded-lg border border-border aspect-video object-cover"
+                />
               </div>
             </template>
             <template v-else-if="field.type === 'textarea'">
@@ -353,6 +362,10 @@ async function uploadMedia(key, e) {
       onProgress: (p) => (uploadPct.value = p),
     });
     config.value[key] = url;
+    // Persist immediately (matches ilot) so the backend promotion is triggered
+    // and the processing badge/poll reflect the real saved state after refresh.
+    await api.put(`/config/${key}`, { value: url });
+    toast.success("Fichier téléversé.");
   } catch (err) {
     toast.error(err?.message || "Échec de l'envoi du fichier.");
   } finally {
@@ -398,20 +411,33 @@ async function refreshProcessingSilently() {
 }
 
 let processingTimer = null;
+let processingTicks = 0;
+const MAX_PROCESSING_TICKS = 60; // ~5 min at 5s — never poll forever
+function stopProcessingPoll() {
+  if (processingTimer) {
+    clearInterval(processingTimer);
+    processingTimer = null;
+  }
+}
 const hasProcessing = computed(() =>
   mediaKeys.some((k) => isProcessing(config.value[k])),
 );
 watch(hasProcessing, (active) => {
   if (active && !processingTimer) {
-    processingTimer = setInterval(refreshProcessingSilently, 5000);
-  } else if (!active && processingTimer) {
-    clearInterval(processingTimer);
-    processingTimer = null;
+    processingTicks = 0;
+    processingTimer = setInterval(() => {
+      processingTicks += 1;
+      if (processingTicks > MAX_PROCESSING_TICKS) {
+        stopProcessingPoll();
+        return;
+      }
+      refreshProcessingSilently();
+    }, 5000);
+  } else if (!active) {
+    stopProcessingPoll();
   }
 });
-onUnmounted(() => {
-  if (processingTimer) clearInterval(processingTimer);
-});
+onUnmounted(stopProcessingPoll);
 
 async function save() {
   const REQUIRED_MULTILINGUAL = [

@@ -58,6 +58,59 @@
       content="https://flamingocoucoubeach.com/og-image.jpg"
     />
 
+    <!-- JSON-LD Structured Data -->
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "Restaurant",
+        "name": "Flamingo Coucou Beach",
+        "alternateName": ["Coucou Beach", "Flamingo Beach Bizerte"],
+        "description": "Beach bar & restaurant tropical à Ghar El Melh, Bizerte. Cocktails, cuisine savoureuse, ambiance de plage et espaces à réserver au Flamingo Coucou Beach.",
+        "url": "https://flamingocoucoubeach.com",
+        "servesCuisine": [
+          "Beach bar",
+          "Cocktails",
+          "Méditerranéenne",
+          "Grillades"
+        ],
+        "priceRange": "$$",
+        "address": {
+          "@type": "PostalAddress",
+          "streetAddress": "Ghar El Melh",
+          "addressLocality": "Ghar El Melh",
+          "addressRegion": "Bizerte",
+          "addressCountry": "TN"
+        },
+        "geo": {
+          "@type": "GeoCoordinates",
+          "latitude": 37.1476125,
+          "longitude": 10.2133906
+        },
+        "openingHoursSpecification": {
+          "@type": "OpeningHoursSpecification",
+          "dayOfWeek": [
+            "Monday",
+            "Tuesday",
+            "Wednesday",
+            "Thursday",
+            "Friday",
+            "Saturday",
+            "Sunday"
+          ],
+          "opens": "10:00",
+          "closes": "00:00"
+        },
+        "image": "https://flamingocoucoubeach.com/og-image.jpg",
+        "potentialAction": {
+          "@type": "ReserveAction",
+          "target": {
+            "@type": "EntryPoint",
+            "urlTemplate": "https://flamingocoucoubeach.com/#reservation"
+          }
+        }
+      }
+    </script>
+
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
