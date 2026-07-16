@@ -90,7 +90,11 @@ export async function galleryRoutes(app) {
     const images = await prisma.galleryImage.findMany({
       where,
       include: { catRef: true },
-      orderBy: { order: "asc" },
+      // Deterministic total ordering: `order` alone ties (many rows share the
+      // default 0), which makes id-cursor pagination overlap and return the
+      // same image on consecutive pages. The `id` tiebreaker (matching the
+      // cursor field) keeps pages stable and duplicate-free.
+      orderBy: [{ order: "asc" }, { id: "asc" }],
       take: limit + 1,
       ...(cursor ? { cursor: { id: Number(cursor) }, skip: 1 } : {}),
     });

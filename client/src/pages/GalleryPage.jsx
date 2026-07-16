@@ -35,7 +35,11 @@ export default function GalleryPage() {
         if (reset) {
           setImages(newItems);
         } else {
-          setImages((prev) => [...prev, ...newItems]);
+          // Guard against duplicates if a page overlaps or an effect re-fires.
+          setImages((prev) => {
+            const seen = new Set(prev.map((p) => p.id));
+            return [...prev, ...newItems.filter((n) => !seen.has(n.id))];
+          });
         }
         setCursor(data.nextCursor);
         setHasMore(!!data.nextCursor);

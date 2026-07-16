@@ -155,6 +155,20 @@ async function deleteImage(img) {
   }
 }
 
+// Optimistic in-place update (category / order) with rollback on failure.
+async function updateImage(img, data) {
+  const prev = {};
+  for (const k of Object.keys(data)) prev[k] = img[k];
+  Object.assign(img, data);
+  try {
+    await api.put(`/gallery/${img.id}`, data);
+    toast.success("Image mise à jour.");
+  } catch (e) {
+    Object.assign(img, prev);
+    toast.error(e?.message || "Erreur de mise à jour.");
+  }
+}
+
 async function saveCat() {
   if (
     !catForm.value.fr.trim() ||
@@ -386,54 +400,84 @@ async function deleteCat(cat) {
       <div
         v-for="img in paginatedImages"
         :key="img.id"
-        class="relative group rounded-xl overflow-hidden border border-border shadow-sm hover:shadow-md transition-shadow"
+        class="group rounded-xl overflow-hidden border border-border shadow-sm hover:shadow-md transition-shadow"
       >
-        <video
-          v-if="isVideoUrl(img.url)"
-          :src="img.url"
-          class="w-full h-40 object-cover"
-          muted
-          playsinline
-          preload="metadata"
-        />
-        <img
-          v-else
-          :src="img.url"
-          :alt="img.alt || ''"
-          class="w-full h-40 object-cover"
-          loading="lazy"
-        />
-        <button
-          v-if="isProcessing(img.url)"
-          type="button"
-          @click="retryProcessing"
-          class="absolute top-2 left-2 z-10 inline-flex items-center gap-1 px-2 py-0.5 rounded bg-amber-500/90 text-white text-[10px] font-medium"
-          title="Relancer le traitement"
-        >
-          <Spinner size-class="h-3 w-3" />
-          Traitement…
-        </button>
-        <div
-          class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2"
-        >
+        <div class="relative">
+          <video
+            v-if="isVideoUrl(img.url)"
+            :src="img.url"
+            class="w-full h-40 object-cover"
+            muted
+            playsinline
+            preload="metadata"
+          />
+          <img
+            v-else
+            :src="img.url"
+            :alt="img.alt || ''"
+            class="w-full h-40 object-cover"
+            loading="lazy"
+          />
           <button
-            @click="toggleVisibility(img)"
-            class="px-3 py-1.5 rounded-lg text-xs font-medium bg-white/90 text-text hover:bg-white transition-colors"
+            v-if="isProcessing(img.url)"
+            type="button"
+            @click="retryProcessing"
+            class="absolute top-2 left-2 z-10 inline-flex items-center gap-1 px-2 py-0.5 rounded bg-amber-500/90 text-white text-[10px] font-medium"
+            title="Relancer le traitement"
           >
-            {{ img.visible ? "Masquer" : "Afficher" }}
+            <Spinner size-class="h-3 w-3" />
+            Traitement…
           </button>
-          <button
-            @click="deleteImage(img)"
-            class="px-3 py-1.5 rounded-lg text-xs font-medium bg-danger/90 text-white hover:bg-danger transition-colors"
+          <div
+            class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2"
           >
-            Supprimer
-          </button>
+            <button
+              @click="toggleVisibility(img)"
+              class="px-3 py-1.5 rounded-lg text-xs font-medium bg-white/90 text-text hover:bg-white transition-colors"
+            >
+              {{ img.visible ? "Masquer" : "Afficher" }}
+            </button>
+            <button
+              @click="deleteImage(img)"
+              class="px-3 py-1.5 rounded-lg text-xs font-medium bg-danger/90 text-white hover:bg-danger transition-colors"
+            >
+              Supprimer
+            </button>
+          </div>
+          <div
+            v-if="!img.visible"
+            class="absolute top-2 right-2 bg-danger text-white text-[0.65rem] px-2 py-0.5 rounded-full font-medium"
+          >
+            Masqué
+          </div>
         </div>
+        <!-- Category + display order (always visible, editable) -->
         <div
-          v-if="!img.visible"
-          class="absolute top-2 right-2 bg-danger text-white text-[0.65rem] px-2 py-0.5 rounded-full font-medium"
+          class="flex items-center gap-2 p-2 bg-surface border-t border-border"
         >
-          Masqué
+          <select
+            :value="img.categoryId || ''"
+            @change="
+              updateImage(img, {
+                categoryId: $event.target.value
+                  ? Number($event.target.value)
+                  : null,
+              })
+            "
+            class="flex-1 min-w-0 text-xs px-2 py-1.5 border border-border rounded-lg bg-white focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-colors"
+          >
+            <option value="">Sans catégorie</option>
+            <option v-for="cat in categories" :key="cat.id" :value="cat.id">
+              {{ cat.name.fr }}
+            </option>
+          </select>
+          <input
+            :value="img.order"
+            type="number"
+            @change="updateImage(img, { order: Number($event.target.value) })"
+            title="Ordre d'affichage"
+            class="w-14 text-xs px-2 py-1.5 border border-border rounded-lg text-center focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-colors"
+          />
         </div>
       </div>
     </div>
