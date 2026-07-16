@@ -1,8 +1,8 @@
 # ─────────────────────────────────────────────────────────────
-# Flamingo CocoBeach UAT – Render Blueprint
+# Flamingo CoucouBeach UAT – Render Blueprint
 # ─────────────────────────────────────────────────────────────
-# Project: Flamingo CocoBeach UAT
-# Bucket: same S3 endpoint as Ilot CocoBeach, container = "flamingo"
+# Project: Flamingo CoucouBeach UAT
+# Bucket: same S3 endpoint as Ilot CoucouBeach, container = "flamingo"
 # ─────────────────────────────────────────────────────────────
 
 services:

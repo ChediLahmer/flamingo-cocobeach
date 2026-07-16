@@ -74,7 +74,7 @@ export default function About({ config }) {
               {config.about_image_1 ? (
                 <img
                   src={config.about_image_1}
-                  alt="Flamingo Coco Beach"
+                  alt="Flamingo Coucou Beach"
                   className="rounded-3xl w-full h-96 object-cover"
                 />
               ) : (

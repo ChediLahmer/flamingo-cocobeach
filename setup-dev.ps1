@@ -1,5 +1,5 @@
 # ============================================================
-# Flamingo Coco Beach - Development Environment Setup
+# Flamingo Coucou Beach - Development Environment Setup
 # ============================================================
 # Run this script on a fresh PC to set up the entire dev stack.
 # Prerequisites: Git, Node.js 20+, Docker Desktop

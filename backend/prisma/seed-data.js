@@ -14,8 +14,8 @@ async function main() {
   // --- Site Config ---
   const configs = {
     name: JSON.stringify({
-      fr: "Flamingo Coco Beach",
-      en: "Flamingo Coco Beach",
+      fr: "Flamingo Coucou Beach",
+      en: "Flamingo Coucou Beach",
       ar: "فلامينغو كوكو بيتش",
     }),
     tagline: JSON.stringify({
@@ -36,9 +36,9 @@ async function main() {
       en: "Corniche Road, La Marsa, Tunisia",
       ar: "طريق الكورنيش، المرسى، تونس",
     }),
-    instagram: "https://instagram.com/flamingo.cocobeach",
-    facebook: "https://facebook.com/flamingococobeach",
-    tiktok: "https://tiktok.com/@flamingococobeach",
+    instagram: "https://instagram.com/flamingo.coucoubeach",
+    facebook: "https://facebook.com/flamingocoucoubeach",
+    tiktok: "https://tiktok.com/@flamingocoucoubeach",
     hours: JSON.stringify({
       fr: "Lun-Dim: 10h00 - 02h00",
       en: "Mon-Sun: 10:00 AM - 2:00 AM",
@@ -102,8 +102,8 @@ async function main() {
     {
       name: { fr: "Piña Colada", en: "Piña Colada", ar: "بينيا كولادا" },
       description: {
-        fr: "Rhum, lait de coco, jus d'ananas frais",
-        en: "Rum, coconut milk, fresh pineapple juice",
+        fr: "Rhum, lait de coucou, jus d'ananas frais",
+        en: "Rum, coucounut milk, fresh pineapple juice",
         ar: "روم، حليب جوز الهند، عصير أناناس طازج",
       },
       image:
@@ -130,10 +130,10 @@ async function main() {
       order: 3,
     },
     {
-      name: { fr: "Virgin Coco", en: "Virgin Coco", ar: "فيرجن كوكو" },
+      name: { fr: "Virgin Coucou", en: "Virgin Coucou", ar: "فيرجن كوكو" },
       description: {
-        fr: "Lait de coco, ananas, sirop de vanille (sans alcool)",
-        en: "Coconut milk, pineapple, vanilla syrup (non-alcoholic)",
+        fr: "Lait de coucou, ananas, sirop de vanille (sans alcool)",
+        en: "Coucounut milk, pineapple, vanilla syrup (non-alcoholic)",
         ar: "حليب جوز الهند، أناناس، شراب الفانيليا (بدون كحول)",
       },
       image:
@@ -165,8 +165,8 @@ async function main() {
         ar: "سموذي استوائي",
       },
       description: {
-        fr: "Mangue, banane, ananas, lait de coco",
-        en: "Mango, banana, pineapple, coconut milk",
+        fr: "Mangue, banane, ananas, lait de coucou",
+        en: "Mango, banana, pineapple, coucounut milk",
         ar: "مانجو، موز، أناناس، حليب جوز الهند",
       },
       priceStandard: 16,
@@ -290,13 +290,13 @@ async function main() {
     },
     {
       name: {
-        fr: "Crème Brûlée Coco",
-        en: "Coconut Crème Brûlée",
+        fr: "Crème Brûlée Coucou",
+        en: "Coucounut Crème Brûlée",
         ar: "كريم بروليه بجوز الهند",
       },
       description: {
-        fr: "Infusée au lait de coco et vanille",
-        en: "Infused with coconut milk and vanilla",
+        fr: "Infusée au lait de coucou et vanille",
+        en: "Infused with coucounut milk and vanilla",
         ar: "منقوعة بحليب جوز الهند والفانيليا",
       },
       priceStandard: 18,

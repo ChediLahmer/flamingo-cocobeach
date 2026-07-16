@@ -91,7 +91,7 @@ export default function Footer({ config }) {
         <div className="mt-10 pt-8 border-t border-white/10 flex flex-col sm:flex-row items-center justify-between gap-4 text-white/40 text-sm">
           <span>
             © {new Date().getFullYear()}{" "}
-            {localizedValue(config.name) || "Flamingo Coco Beach"}.
+            {localizedValue(config.name) || "Flamingo Coucou Beach"}.
             {t("footer.rights")}.
           </span>
           <span>Designed with ☀️ & 🦩 vibes</span>

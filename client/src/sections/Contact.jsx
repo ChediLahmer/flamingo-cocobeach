@@ -62,7 +62,7 @@ export default function Contact({ config }) {
                   {t("contact.address_label")}
                 </h3>
                 <p className="text-gray-600 mt-1">
-                  {localizedValue(config.address) || "Coco Beach, Tunisie"}
+                  {localizedValue(config.address) || "Coucou Beach, Tunisie"}
                 </p>
               </div>
             </div>

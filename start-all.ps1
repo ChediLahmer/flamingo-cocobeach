@@ -1,4 +1,4 @@
-# Start all Flamingo Coco Beach services
+# Start all Flamingo Coucou Beach services
 $root = $PSScriptRoot
 
 # Backend API (port 3000)

@@ -13,7 +13,7 @@ const TITLES = [
   },
   { fr: "Cocktail Sunset", en: "Sunset Cocktail", ar: "كوكتيل الغروب" },
   { fr: "Pizza Flamingo", en: "Flamingo Pizza", ar: "بيتزا فلامينغو" },
-  { fr: "Burger Coco", en: "Coco Burger", ar: "برغر كوكو" },
+  { fr: "Burger Coucou", en: "Coucou Burger", ar: "برغر كوكو" },
   { fr: "Salade Tropicale", en: "Tropical Salad", ar: "سلطة استوائية" },
   { fr: "Glace Maison", en: "Homemade Ice Cream", ar: "آيس كريم منزلي" },
   { fr: "Smoothie Mangue", en: "Mango Smoothie", ar: "سموذي المانجو" },

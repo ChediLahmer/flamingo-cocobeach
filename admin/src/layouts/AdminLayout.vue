@@ -44,7 +44,7 @@ function handleLogout() {
           >
             FLAMINGO
           </h1>
-          <p class="text-[0.6rem] text-text-muted">Coco Beach</p>
+          <p class="text-[0.6rem] text-text-muted">Coucou Beach</p>
         </div>
       </div>
 

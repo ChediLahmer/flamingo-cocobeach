@@ -1,6 +1,6 @@
-# Flamingo Coco Beach
+# Flamingo Coucou Beach
 
-A showcase ("vitrine") website for Flamingo Coco Beach — fun, alive, and energetic.
+A showcase ("vitrine") website for Flamingo Coucou Beach — fun, alive, and energetic.
 
 ## Architecture
 
@@ -38,7 +38,7 @@ npm run dev
 Copy `.env.example` to `.env` and configure:
 
 ```
-DATABASE_URL=postgresql://user:password@localhost:5432/flamingo_cocobeach
+DATABASE_URL=postgresql://user:password@localhost:5432/flamingo_coucoubeach
 JWT_SECRET=your-secret-key
 S3_ENDPOINT=http://localhost:9100
 S3_ACCESS_KEY=minioadmin

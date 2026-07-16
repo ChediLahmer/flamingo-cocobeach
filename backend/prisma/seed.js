@@ -23,8 +23,8 @@ async function main() {
     [
       "name",
       JSON.stringify({
-        fr: "Flamingo Coco Beach",
-        en: "Flamingo Coco Beach",
+        fr: "Flamingo Coucou Beach",
+        en: "Flamingo Coucou Beach",
         ar: "فلامينغو كوكو بيتش",
       }),
     ],
@@ -49,8 +49,8 @@ async function main() {
     [
       "address",
       JSON.stringify({
-        fr: "Coco Beach, Tunisie",
-        en: "Coco Beach, Tunisia",
+        fr: "Coucou Beach, Tunisie",
+        en: "Coucou Beach, Tunisia",
         ar: "كوكو بيتش، تونس",
       }),
     ],
@@ -65,22 +65,22 @@ async function main() {
     [
       "seo_title",
       JSON.stringify({
-        fr: "Flamingo Coco Beach — Restaurant & Beach Bar en Tunisie",
-        en: "Flamingo Coco Beach — Beach Bar & Restaurant in Tunisia",
+        fr: "Flamingo Coucou Beach — Restaurant & Beach Bar en Tunisie",
+        en: "Flamingo Coucou Beach — Beach Bar & Restaurant in Tunisia",
         ar: "فلامينغو كوكو بيتش — مطعم وبار شاطئي في تونس",
       }),
     ],
     [
       "seo_description",
       JSON.stringify({
-        fr: "Cocktails tropicaux, cuisine savoureuse et ambiance de plage à Flamingo Coco Beach. Réservez votre espace et vivez le paradis tropical.",
-        en: "Tropical cocktails, delicious food and a vibrant beach atmosphere at Flamingo Coco Beach. Book your space and live the tropical paradise.",
+        fr: "Cocktails tropicaux, cuisine savoureuse et ambiance de plage à Flamingo Coucou Beach. Réservez votre espace et vivez le paradis tropical.",
+        en: "Tropical cocktails, delicious food and a vibrant beach atmosphere at Flamingo Coucou Beach. Book your space and live the tropical paradise.",
         ar: "كوكتيلات استوائية وأطباق شهية وأجواء شاطئية في فلامينغو كوكو بيتش. احجز مكانك وعش الجنة الاستوائية.",
       }),
     ],
     [
       "seo_keywords",
-      "beach bar, restaurant, plage, cocktails, Tunisie, Coco Beach, tropical, événements",
+      "beach bar, restaurant, plage, cocktails, Tunisie, Coucou Beach, tropical, événements",
     ],
     ["og_image", ""],
     ["popup_enabled", "true"],

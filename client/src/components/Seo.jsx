@@ -35,7 +35,7 @@ export default function Seo({ config = {}, title, description, path = "" }) {
   const { lang, localizedValue } = useLanguage();
 
   useEffect(() => {
-    const siteName = localizedValue(config.name) || "Flamingo Coco Beach";
+    const siteName = localizedValue(config.name) || "Flamingo Coucou Beach";
     const baseTitle = localizedValue(config.seo_title) || siteName;
     const fullTitle = title ? `${title} · ${siteName}` : baseTitle;
     const desc =
