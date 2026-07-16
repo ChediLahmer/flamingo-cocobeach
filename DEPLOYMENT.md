@@ -8,22 +8,23 @@ This guide is specific to this repository. For the deeper "why" behind these cho
 
 ## 1. Architecture
 
-One Docker Compose project (`docker-compose.prod.yml`) with six services:
+One Docker Compose project (`docker-compose.prod.yml`) with seven services:
 
-| Service      | Container          | Role                                                              |
-| ------------ | ------------------ | ----------------------------------------------------------------- |
-| `traefik`    | `flamingo-traefik` | Reverse proxy + automatic Let's Encrypt HTTPS                     |
-| `db`         | `flamingo-db`      | PostgreSQL 16 (volume `pgdata`)                                   |
-| `minio`      | `flamingo-storage` | S3-compatible object storage (volume `miniodata`)                 |
-| `minio-init` | (one-shot)         | Creates the bucket + sets public-read (`download`) policy         |
-| `backend`    | `flamingo-backend` | Fastify API; runs `prisma migrate deploy` then starts             |
-| `web`        | `flamingo-web`     | nginx — builds & serves the React client + Vue admin, proxies API |
+| Service      | Container          | Role                                                                    |
+| ------------ | ------------------ | ----------------------------------------------------------------------- |
+| `traefik`    | `flamingo-traefik` | Reverse proxy + automatic Let's Encrypt HTTPS                           |
+| `db`         | `flamingo-db`      | PostgreSQL 16 (volume `pgdata`)                                         |
+| `minio`      | `flamingo-storage` | S3-compatible object storage (volume `miniodata`)                       |
+| `minio-init` | (one-shot)         | Creates the bucket + sets public-read (`download`) policy               |
+| `backend`    | `flamingo-backend` | Fastify API on `api.<domain>`; runs `prisma migrate deploy` then starts |
+| `client`     | `flamingo-client`  | nginx serving the React public site (`<domain>` / `www.<domain>`)       |
+| `admin`      | `flamingo-admin`   | nginx serving the Vue admin panel (`admin.<domain>`)                    |
 
-**Single origin.** nginx serves everything on one host:
+**Subdomains** (same layout as ilot). Each app is its own container behind Traefik:
 
-- `https://<domain>/` → React public site
-- `https://<domain>/admin` → Vue admin panel
-- `https://<domain>/api/` → proxied to the backend (same origin, so no browser CORS needed)
+- `https://<domain>/` and `https://www.<domain>/` → React public site
+- `https://admin.<domain>/` → Vue admin panel
+- `https://api.<domain>/` → Fastify backend (the frontends call it via `VITE_API_URL`, baked at build time)
 
 **Two extra storage hostnames** (both A records → the same VPS IP):
 
@@ -49,12 +50,14 @@ One Docker Compose project (`docker-compose.prod.yml`) with six services:
 
 ## 3. DNS
 
-Create four A records, all pointing at the VPS IP:
+Create six A records, all pointing at the VPS IP:
 
 | Record            | Type | Cloudflare cloud (later)     |
 | ----------------- | ---- | ---------------------------- |
 | `<domain>` (apex) | A    | Orange (proxied)             |
 | `www`             | A    | Orange (proxied)             |
+| `admin`           | A    | Orange (proxied)             |
+| `api`             | A    | Orange (proxied)             |
 | `storage`         | A    | Orange (proxied — CDN cache) |
 | `upload`          | A    | **Grey (DNS only)** ⚠️       |
 
@@ -91,7 +94,7 @@ docker compose -f docker-compose.prod.yml up -d --build
 
 This will:
 
-1. build the nginx image (compiles the React client and Vue admin),
+1. build the client and admin images (compiles the React site and Vue admin),
 2. build the backend image (installs deps + ffmpeg, runs `prisma generate`),
 3. start Postgres and MinIO, create the bucket (`minio-init`),
 4. start the backend, which runs **`prisma migrate deploy`** automatically, then listens,
@@ -124,7 +127,7 @@ docker compose -f docker-compose.prod.yml exec backend node prisma/seed.js
 
 Then:
 
-1. Open `https://<domain>/admin` and log in with `ADMIN_EMAIL` / `ADMIN_PASSWORD`.
+1. Open `https://admin.<domain>` and log in with `ADMIN_EMAIL` / `ADMIN_PASSWORD`.
 2. Fill in real content (config, menu, spaces, gallery…).
 
 > **Verify storage is reachable** (catches the multi-network 504 early):
@@ -142,7 +145,7 @@ Serves media from Cloudflare's edge (fast worldwide) and caches JS/CSS/OG images
 1. Add the site to Cloudflare (Free plan), review the imported DNS records — **keep MX/TXT email records**.
 2. At the registrar, switch the nameservers to Cloudflare's. Both old and new point at the same VPS, so there is no downtime.
 3. Once the first HTTPS load worked directly, set the cloud state:
-   - `<domain>`, `www`, `storage` → **Orange (proxied)**
+   - `<domain>`, `www`, `admin`, `api`, `storage` → **Orange (proxied)**
    - `upload` → **Grey (DNS only)** ⚠️ (leave it grey — this is the >100 MB upload path)
 4. **SSL/TLS → Overview → Full (strict)**. Never use "Flexible" (redirect loops). Traefik's ACME renewal keeps working because Cloudflare passes `/.well-known/acme-challenge/` through.
 5. **Caching → Cache Rules**: when **Hostname equals** `storage.<domain>` → **Eligible for cache**, **Edge TTL = use cache-control header** (uploads already send `immutable, max-age=31536000`).
@@ -168,7 +171,7 @@ docker compose -f docker-compose.prod.yml up -d --build
 
 - Frontend env/code is **baked at build time**, so a rebuild is required to pick up client/admin changes (`--build`).
 - New DB migrations apply automatically on backend start (`prisma migrate deploy`).
-- Only restart what changed if you prefer, e.g. `... up -d --build backend web`.
+- Only restart what changed if you prefer, e.g. `... up -d --build backend client admin`.
 
 ---
 
