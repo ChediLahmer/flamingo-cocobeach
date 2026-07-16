@@ -12,6 +12,8 @@ const activeCategory = ref(null);
 const loading = ref(false);
 const error = ref(null);
 const saving = ref(false);
+const uploading = ref(false);
+const uploadPct = ref(0);
 
 const items = ref([]);
 const itemTotal = ref(0);
@@ -294,7 +296,16 @@ async function saveItem() {
     } else if (itemForm.value.image) {
       const fd = new FormData();
       fd.append("file", itemForm.value.image);
-      const res = await api.upload("/upload", fd);
+      uploading.value = true;
+      uploadPct.value = 0;
+      let res;
+      try {
+        res = await api.upload("/upload", fd, {
+          onProgress: (p) => (uploadPct.value = p),
+        });
+      } finally {
+        uploading.value = false;
+      }
       imageUrl = res.url;
     }
     const payload = {
@@ -1249,7 +1260,13 @@ onUnmounted(() => {
                 :disabled="saving"
                 class="px-4 py-2 text-sm bg-primary text-white rounded-lg hover:bg-primary-dark disabled:opacity-50 transition-colors"
               >
-                {{ saving ? "..." : "Enregistrer" }}
+                {{
+                  uploading
+                    ? `Envoi ${uploadPct}%…`
+                    : saving
+                      ? "..."
+                      : "Enregistrer"
+                }}
               </button>
             </div>
           </div>

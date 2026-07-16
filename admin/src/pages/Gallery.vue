@@ -2,6 +2,7 @@
 import { ref, computed, onMounted, onUnmounted, watch } from "vue";
 import { useApi } from "../composables/useApi";
 import { useToast } from "../composables/useToast";
+import Spinner from "../components/Spinner.vue";
 
 const ITEMS_PER_PAGE = 24;
 const api = useApi();
@@ -406,10 +407,11 @@ async function deleteCat(cat) {
           v-if="isProcessing(img.url)"
           type="button"
           @click="retryProcessing"
-          class="absolute top-2 left-2 z-10 px-2 py-0.5 rounded bg-amber-500/90 text-white text-[10px] font-medium"
+          class="absolute top-2 left-2 z-10 inline-flex items-center gap-1 px-2 py-0.5 rounded bg-amber-500/90 text-white text-[10px] font-medium"
           title="Relancer le traitement"
         >
-          ⏳ Traitement…
+          <Spinner size-class="h-3 w-3" />
+          Traitement…
         </button>
         <div
           class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2"

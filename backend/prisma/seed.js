@@ -39,9 +39,9 @@ async function main() {
     [
       "description",
       JSON.stringify({
-        fr: "Restaurant & Beach Bar",
-        en: "Restaurant & Beach Bar",
-        ar: "مطعم وبار شاطئي",
+        fr: "Beach Bar & Restaurant à Ghar El Melh, Bizerte",
+        en: "Beach Bar & Restaurant in Ghar El Melh, Bizerte",
+        ar: "بار ومطعم شاطئي في غار الملح، بنزرت",
       }),
     ],
     ["phone", "+216 00 000 000"],
@@ -49,9 +49,9 @@ async function main() {
     [
       "address",
       JSON.stringify({
-        fr: "Coucou Beach, Tunisie",
-        en: "Coucou Beach, Tunisia",
-        ar: "كوكو بيتش، تونس",
+        fr: "Ghar El Melh, Bizerte, Tunisie",
+        en: "Ghar El Melh, Bizerte, Tunisia",
+        ar: "غار الملح، بنزرت، تونس",
       }),
     ],
     [
@@ -65,17 +65,17 @@ async function main() {
     [
       "seo_title",
       JSON.stringify({
-        fr: "Flamingo Coucou Beach — Restaurant & Beach Bar en Tunisie",
-        en: "Flamingo Coucou Beach — Beach Bar & Restaurant in Tunisia",
-        ar: "فلامينغو كوكو بيتش — مطعم وبار شاطئي في تونس",
+        fr: "Flamingo Coucou Beach — Beach Bar & Restaurant à Ghar El Melh, Bizerte",
+        en: "Flamingo Coucou Beach — Beach Bar & Restaurant in Ghar El Melh, Bizerte",
+        ar: "فلامينغو كوكو بيتش — بار ومطعم شاطئي في غار الملح، بنزرت",
       }),
     ],
     [
       "seo_description",
       JSON.stringify({
-        fr: "Cocktails tropicaux, cuisine savoureuse et ambiance de plage à Flamingo Coucou Beach. Réservez votre espace et vivez le paradis tropical.",
-        en: "Tropical cocktails, delicious food and a vibrant beach atmosphere at Flamingo Coucou Beach. Book your space and live the tropical paradise.",
-        ar: "كوكتيلات استوائية وأطباق شهية وأجواء شاطئية في فلامينغو كوكو بيتش. احجز مكانك وعش الجنة الاستوائية.",
+        fr: "Le paradis tropical à Ghar El Melh, Bizerte. Cocktails, cuisine savoureuse et ambiance de plage. Réservez votre espace au Flamingo Coucou Beach.",
+        en: "The tropical paradise in Ghar El Melh, Bizerte. Cocktails, delicious food and a vibrant beach atmosphere. Book your space at Flamingo Coucou Beach.",
+        ar: "الجنة الاستوائية في غار الملح، بنزرت. كوكتيلات وأطباق شهية وأجواء شاطئية. احجز مكانك في فلامينغو كوكو بيتش.",
       }),
     ],
     [

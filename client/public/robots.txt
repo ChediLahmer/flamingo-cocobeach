@@ -1,3 +1,15 @@
+# Explicitly allow social/link-preview crawlers. Facebook's scraper
+# (facebookexternalhit) intermittently reports a 403 "robots.txt block" unless
+# it is allow-listed by name, even when User-agent: * already allows everything.
+User-agent: facebookexternalhit
+Allow: /
+
+User-agent: Facebot
+Allow: /
+
+User-agent: Twitterbot
+Allow: /
+
 User-agent: *
 Allow: /
 

@@ -59,9 +59,14 @@
               </div>
             </template>
             <template v-else-if="field.type === 'media'">
-              <div class="flex items-center gap-3">
+              <div class="flex items-center gap-3 flex-wrap">
                 <label
                   class="inline-flex items-center gap-2 px-4 py-2 bg-primary/5 hover:bg-primary/10 border border-border rounded-lg cursor-pointer transition-colors text-sm font-medium text-text"
+                  :class="
+                    uploadingKey === field.key
+                      ? 'opacity-60 pointer-events-none'
+                      : ''
+                  "
                 >
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
@@ -83,25 +88,57 @@
                     @change="(e) => uploadMedia(field.key, e)"
                     accept="image/*,video/*"
                     class="hidden"
+                    :disabled="uploadingKey === field.key"
                   />
                 </label>
+
+                <!-- Upload progress -->
+                <div
+                  v-if="uploadingKey === field.key"
+                  class="flex items-center gap-2 min-w-[160px]"
+                >
+                  <Spinner size-class="h-4 w-4" class="text-primary" />
+                  <div
+                    class="flex-1 h-1.5 rounded-full bg-border overflow-hidden"
+                  >
+                    <div
+                      class="h-full bg-primary transition-all duration-150"
+                      :style="{ width: uploadPct + '%' }"
+                    ></div>
+                  </div>
+                  <span class="text-xs text-text-muted tabular-nums"
+                    >{{ uploadPct }}%</span
+                  >
+                </div>
+
                 <img
-                  v-if="config[field.key] && !isVideoUrl(config[field.key])"
+                  v-else-if="
+                    config[field.key] && !isVideoUrl(config[field.key])
+                  "
                   :src="config[field.key]"
                   class="w-12 h-12 rounded object-cover border"
                 />
+
                 <span
-                  v-if="isProcessing(config[field.key])"
-                  class="text-xs text-amber-600 font-medium"
-                  >⏳ Vidéo en cours de traitement…</span
+                  v-if="
+                    uploadingKey !== field.key &&
+                    isProcessing(config[field.key])
+                  "
+                  class="inline-flex items-center gap-1.5 text-xs text-amber-600 font-medium"
                 >
+                  <Spinner size-class="h-3.5 w-3.5" />
+                  Vidéo en cours de traitement…
+                </span>
                 <span
-                  v-else-if="config[field.key]"
+                  v-else-if="uploadingKey !== field.key && config[field.key]"
                   class="text-xs text-success font-medium"
                   >✓ Fichier uploadé</span
                 >
                 <button
-                  v-if="isProcessing(config[field.key])"
+                  v-if="
+                    uploadingKey !== field.key &&
+                    isProcessing(config[field.key])
+                  "
                   type="button"
                   @click="retryProcessing"
                   class="text-xs text-primary underline"
@@ -167,11 +204,14 @@
 import { ref, computed, watch, onMounted, onUnmounted } from "vue";
 import { useApi } from "../composables/useApi";
 import { useToast } from "../composables/useToast";
+import Spinner from "../components/Spinner.vue";
 
 const api = useApi();
 const toast = useToast();
 const saving = ref(false);
 const loaded = ref(false);
+const uploadingKey = ref(null);
+const uploadPct = ref(0);
 
 const MULTILINGUAL_KEYS = new Set([
   "name",
@@ -306,8 +346,19 @@ async function uploadMedia(key, e) {
   if (!file) return;
   const fd = new FormData();
   fd.append("file", file);
-  const { url } = await api.upload("/upload", fd);
-  config.value[key] = url;
+  uploadingKey.value = key;
+  uploadPct.value = 0;
+  try {
+    const { url } = await api.upload("/upload", fd, {
+      onProgress: (p) => (uploadPct.value = p),
+    });
+    config.value[key] = url;
+  } catch (err) {
+    toast.error(err?.message || "Échec de l'envoi du fichier.");
+  } finally {
+    uploadingKey.value = null;
+    e.target.value = "";
+  }
 }
 
 const mediaKeys = configGroups.flatMap((g) =>

@@ -2,6 +2,7 @@
 import { ref, computed, onMounted, onUnmounted, watch } from "vue";
 import { useApi } from "../composables/useApi";
 import { useToast } from "../composables/useToast";
+import Spinner from "../components/Spinner.vue";
 
 const ITEMS_PER_PAGE = 9;
 const api = useApi();
@@ -11,6 +12,8 @@ const showForm = ref(false);
 const editing = ref(null);
 const loading = ref(false);
 const saving = ref(false);
+const uploading = ref(false);
+const uploadPct = ref(0);
 const error = ref(null);
 const page = ref(1);
 const totalPages = ref(1);
@@ -208,7 +211,16 @@ async function save() {
     } else if (form.value.image) {
       const fd = new FormData();
       fd.append("file", form.value.image);
-      const res = await api.upload("/upload", fd);
+      uploading.value = true;
+      uploadPct.value = 0;
+      let res;
+      try {
+        res = await api.upload("/upload", fd, {
+          onProgress: (p) => (uploadPct.value = p),
+        });
+      } finally {
+        uploading.value = false;
+      }
       imageUrl = res.url;
     }
     const data = {
@@ -435,10 +447,11 @@ async function toggleVisible(space) {
             v-if="isProcessing(space.image)"
             type="button"
             @click="retryProcessing"
-            class="absolute top-2 left-2 px-2 py-0.5 rounded bg-amber-500/90 text-white text-[10px] font-medium"
+            class="absolute top-2 left-2 inline-flex items-center gap-1 px-2 py-0.5 rounded bg-amber-500/90 text-white text-[10px] font-medium"
             title="Relancer le traitement"
           >
-            ⏳ Traitement…
+            <Spinner size-class="h-3 w-3" />
+            Traitement…
           </button>
         </div>
         <div
@@ -912,7 +925,13 @@ async function toggleVisible(space) {
                 :disabled="saving"
                 class="px-4 py-2 text-sm bg-primary text-white rounded-lg hover:bg-primary-dark disabled:opacity-50 transition-colors"
               >
-                {{ saving ? "..." : "Enregistrer" }}
+                {{
+                  uploading
+                    ? `Envoi ${uploadPct}%…`
+                    : saving
+                      ? "..."
+                      : "Enregistrer"
+                }}
               </button>
             </div>
           </div>

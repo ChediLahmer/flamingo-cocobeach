@@ -32,22 +32,69 @@ export function useApi() {
     return /\.(mp4|webm|ogg|mov|m4v|mkv|avi)$/i.test(file.name || "");
   }
 
+  // XHR wrapper so uploads can report progress (fetch cannot). Resolves parsed
+  // JSON (or null) and rejects with a friendly message; handles 401 / 413.
+  function xhrSend(method, url, body, { headers = {}, onProgress } = {}) {
+    return new Promise((resolve, reject) => {
+      const xhr = new XMLHttpRequest();
+      xhr.open(method, url);
+      for (const [k, v] of Object.entries(headers)) {
+        xhr.setRequestHeader(k, v);
+      }
+      if (onProgress && xhr.upload) {
+        xhr.upload.addEventListener("progress", (e) => {
+          if (e.lengthComputable) {
+            onProgress(Math.round((e.loaded / e.total) * 100));
+          }
+        });
+      }
+      xhr.addEventListener("load", () => {
+        if (xhr.status >= 200 && xhr.status < 300) {
+          if (xhr.status === 204 || !xhr.responseText) return resolve(null);
+          try {
+            resolve(JSON.parse(xhr.responseText));
+          } catch {
+            resolve(null);
+          }
+          return;
+        }
+        if (xhr.status === 401) {
+          localStorage.removeItem("token");
+          window.location.href = "/login";
+          return reject(new Error("Session expired"));
+        }
+        let msg;
+        try {
+          const j = JSON.parse(xhr.responseText);
+          msg = j.message || j.error;
+        } catch {
+          msg = xhr.responseText;
+        }
+        if (xhr.status === 413) msg = "Fichier trop volumineux";
+        reject(new Error(msg || "Échec de l'envoi"));
+      });
+      xhr.addEventListener("error", () => reject(new Error("Erreur réseau")));
+      xhr.addEventListener("timeout", () =>
+        reject(new Error("La requête a expiré. Réessayez.")),
+      );
+      xhr.send(body);
+    });
+  }
+
   // Videos upload presigned direct-to-storage (under incoming/) and are
   // transcoded/promoted in the background, bypassing the sync 50MB/proxy path.
-  async function uploadVideoPresigned(file) {
+  // onProgress(percent) reports the direct-to-storage upload progress.
+  async function uploadVideoPresigned(file, onProgress) {
     const contentType = file.type || "video/mp4";
     const presign = await request("/upload/presign", {
       method: "POST",
       body: { filename: file.name, contentType, sizeBytes: file.size },
     });
-    const putRes = await fetch(presign.url, {
-      method: "PUT",
+    // Only Content-Type may be signed for the browser PUT.
+    await xhrSend("PUT", presign.url, file, {
       headers: { "Content-Type": contentType },
-      body: file,
+      onProgress,
     });
-    if (!putRes.ok) {
-      throw new Error(`Échec de l'envoi vers le stockage (${putRes.status})`);
-    }
     return { url: presign.publicUrl };
   }
 
@@ -77,10 +124,10 @@ export function useApi() {
       return res;
     },
     del: (path) => request(path, { method: "DELETE" }),
-    upload: async (path, formData) => {
+    upload: async (path, formData, { onProgress } = {}) => {
       const file = formData.get?.("file");
       if (isVideoFile(file)) {
-        const { url } = await uploadVideoPresigned(file);
+        const { url } = await uploadVideoPresigned(file, onProgress);
         // /upload just returns the URL; the page then saves the entity and the
         // post/put trigger kicks processing. Direct-create endpoints such as
         // /gallery accept a JSON { url } body, so create + trigger here.
@@ -93,7 +140,14 @@ export function useApi() {
         maybeTriggerProcessing({ url });
         return res;
       }
-      return request(path, { method: "POST", body: formData });
+      // Sync multipart (images) via XHR so we get upload progress too.
+      const headers = token.value
+        ? { Authorization: `Bearer ${token.value}` }
+        : {};
+      return xhrSend("POST", `${BASE}${path}`, formData, {
+        headers,
+        onProgress,
+      });
     },
   };
 }
