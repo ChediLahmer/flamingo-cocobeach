@@ -23,7 +23,7 @@
       <h1
         class="font-display text-3xl text-center text-text tracking-wide mb-0"
       >
-        FLAMINGO COCO BEACH
+        FLAMINGO COUCOU BEACH
       </h1>
       <p class="text-center text-text-muted text-sm mb-8">
         Espace Administration

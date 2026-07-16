@@ -43,7 +43,7 @@ export async function sendUserPasswordResetEmail(toEmail, resetUrl) {
       <div style="font-family: 'Helvetica Neue', Arial, sans-serif; max-width: 520px; margin: 0 auto; background:#fdf6f0; border-radius:18px; overflow:hidden;">
         <div style="background: linear-gradient(135deg,#ff6b9d,#ff8a50); padding: 32px; text-align:center;">
           <div style="font-size:42px;">🦩</div>
-          <h1 style="color:#fff; margin:6px 0 0; font-size:22px; letter-spacing:1px;">FLAMINGO COCO BEACH</h1>
+          <h1 style="color:#fff; margin:6px 0 0; font-size:22px; letter-spacing:1px;">FLAMINGO COUCOU BEACH</h1>
         </div>
         <div style="padding: 32px;">
           <h2 style="color:#1a1a2e; margin-top:0;">Réinitialisation du mot de passe</h2>
@@ -74,7 +74,7 @@ export async function sendWelcomeEmail(toEmail, name, siteUrl) {
       <div style="font-family: 'Helvetica Neue', Arial, sans-serif; max-width: 520px; margin: 0 auto; background:#fdf6f0; border-radius:18px; overflow:hidden;">
         <div style="background: linear-gradient(135deg,#ff6b9d,#ff8a50); padding: 36px 32px; text-align:center;">
           <div style="font-size:46px;">🦩</div>
-          <h1 style="color:#fff; margin:8px 0 0; font-size:26px; letter-spacing:1px;">FLAMINGO COCO BEACH</h1>
+          <h1 style="color:#fff; margin:8px 0 0; font-size:26px; letter-spacing:1px;">FLAMINGO COUCOU BEACH</h1>
           <p style="color:rgba(255,255,255,0.9); margin:6px 0 0; font-size:14px;">Le paradis tropical qui prend vie</p>
         </div>
         <div style="padding: 32px;">
